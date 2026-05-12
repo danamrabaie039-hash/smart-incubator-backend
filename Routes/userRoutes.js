@@ -9,16 +9,15 @@ const roleMiddleware = require('../Middleware/roleMiddleware')
 // ================= LOGIN =================
 router.post('/login', userController.login)
 
-router.post('/create-engineer', userController.createEngineer)
 
 // ================= ENGINEER (ONLY ADMIN) =================
 // لازم يكون محمي
-// router.post(
-//   '/create-engineer',
-//   auth,
-//   roleMiddleware(['engineer']),
-//   userController.createEngineer
-// )
+router.post(
+  '/create-engineer',
+  auth,
+  roleMiddleware(['engineer']),
+  userController.createEngineer
+)
 
 
 // ================= DOCTOR =================
