@@ -49,17 +49,17 @@ exports.login = async function (req, res) {
     )
 
     return res.status(200).json({
-      message: "User Logged In Successfully",
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        username: user.username,
-        token
-      }
-    })
-
+  message: "User Logged In Successfully",
+  token,
+  role: user.role,
+  user: {
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    username: user.username
+  }
+  })
   } catch (error) {
     res.status(400).json({ message: error.message })
   }
