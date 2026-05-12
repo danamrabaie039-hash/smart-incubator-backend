@@ -8,6 +8,8 @@ const userSchema = new Schema({
   type: String,
   unique: true
   },
+  displayName: { type: String },
+   badge: { type: String },
   specialty: {
   type: String,
   default: ""
