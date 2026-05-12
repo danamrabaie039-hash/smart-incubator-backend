@@ -1,0 +1,38 @@
+const mongoose = require('mongoose')
+const bcryptJS = require('bcryptjs')
+const Schema = mongoose.Schema
+
+const userSchema = new Schema({
+  name: { type: String, required: true, trim: true },
+  username: {
+  type: String,
+  unique: true
+  },
+  specialty: {
+  type: String,
+  default: ""
+ },
+  age: Number,
+
+  phone: {
+    type: String,
+    unique: true,
+    sparse: true
+  },
+
+  email: { type: String, unique: true, required: true, trim: true },
+
+  password: { type: String, required: true },
+
+  role: {
+    type: String,
+    enum: ["engineer", "doctor", "nurse", "parent"],
+    default: "parent"
+  }
+})
+
+userSchema.methods.comparePassword = async function (password) {
+  return await bcryptJS.compare(password, this.password)
+}
+
+module.exports = mongoose.model('Users', userSchema)
