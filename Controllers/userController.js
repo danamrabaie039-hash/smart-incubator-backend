@@ -13,8 +13,7 @@ function generateUsername(fullName) {
 
   if (names.length < 2) {
     return names[0]
-  } 
-  
+  }
 
   const firstInitial = names[0][0]
   const secondInitial = names[1][0]
