@@ -4,23 +4,26 @@ const router = express.Router()
 const userController = require('../Controllers/userController')
 const auth = require('../Middleware/auth')
 const roleMiddleware = require('../Middleware/roleMiddleware')
-
-
+router.post('/create-engineer', userController.createEngineer)
 // ================= LOGIN =================
-router.post('/login', userController.login)
-
-
-// ================= ENGINEER (ONLY ADMIN) =================
-// لازم يكون محمي
 router.post(
-  '/create-engineer',
-  auth,
-  roleMiddleware(['engineer']),
-  userController.createEngineer
+  '/login',
+  userController.login
 )
 
+// ================= CREATE ENGINEER =================
+// router.post(
+//   '/create-engineer',
+//   auth,
+//   roleMiddleware(['engineer']),
+//   userController.createEngineer
+// )
+router.post('/create-engineer', userController.createEngineer)
 
-// ================= DOCTOR =================
+
+
+
+// ================= CREATE DOCTOR =================
 router.post(
   '/create-doctor',
   auth,
@@ -28,8 +31,7 @@ router.post(
   userController.createDoctor
 )
 
-
-// ================= NURSE =================
+// ================= CREATE NURSE =================
 router.post(
   '/create-nurse',
   auth,
@@ -37,8 +39,7 @@ router.post(
   userController.createNurse
 )
 
-
-// ================= PARENT =================
+// ================= CREATE PARENT =================
 router.post(
   '/create-parent',
   auth,

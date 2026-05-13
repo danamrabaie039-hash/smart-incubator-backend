@@ -2,20 +2,27 @@ const userModule = require('../Models/User')
 const bcryptJS = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
+
 // ================= USERNAME GENERATOR =================
 function generateUsername(fullName) {
-  const names = fullName.trim().split(' ')
+  const names = fullName
+    .trim()
+    .toLowerCase()
+    .split(' ')
+    .filter(n => n.length > 0)
 
-  if (names.length < 3) {
-    return fullName.toLowerCase().replace(/\s+/g, '.')
-  }
+  if (names.length < 2) {
+    return names[0]
+  } 
+  
 
-  const firstLetter = names[0][0].toLowerCase()
-  const middleLetter = names[1][0].toLowerCase()
-  const lastName = names[names.length - 1].toLowerCase()
+  const firstInitial = names[0][0]
+  const secondInitial = names[1][0]
+  const lastName = names[names.length - 1]
 
-  return `${firstLetter}.${middleLetter}.${lastName}`
+  return `${firstInitial}.${secondInitial}.${lastName}`
 }
+
 
 // ================= BADGE =================
 function getBadge(role) {
@@ -24,6 +31,7 @@ function getBadge(role) {
   if (role === "engineer") return "ENG"
   return "PARENT"
 }
+
 
 // ================= DISPLAY NAME =================
 function getDisplayName(role, name) {
@@ -34,56 +42,70 @@ function getDisplayName(role, name) {
 }
 
 
-
 // ================= LOGIN =================
 exports.login = async function (req, res) {
   try {
+
     let user = await userModule.findOne({ email: req.body.email })
 
     if (!user) {
-      return res.status(401).json({ message: "Invalid Email or Password" })
+      return res.status(401).json({
+        status: "error",
+        message: "Invalid Email or Password"
+      })
     }
 
     let passwordCheck = await user.comparePassword(req.body.password)
 
     if (!passwordCheck) {
-      return res.status(401).json({ message: "Invalid Email or Password" })
+      return res.status(401).json({
+        status: "error",
+        message: "Invalid Email or Password"
+      })
     }
+
+    const normalizedRole = user.role.toLowerCase()
 
     const token = jwt.sign(
       {
         _id: user._id,
         name: user.name,
-        role: user.role
+        role: normalizedRole
       },
       'incubator_secret_key',
       { expiresIn: '1d' }
     )
 
     return res.status(200).json({
-      message: "User Logged In Successfully",
-      token,
-      role: user.role,
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        username: user.username,
-        displayName: user.displayName,
-        badge: user.badge
+      status: "success",
+      message: "Login successful",
+      data: {
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          role: normalizedRole,
+          username: user.username,
+          displayName: user.displayName,
+          badge: user.badge
+        },
+        token: token
       }
     })
+
   } catch (error) {
-    res.status(400).json({ message: error.message })
+    return res.status(500).json({
+      status: "error",
+      message: error.message
+    })
   }
 }
 
 
-
- // ================= CREATE ENGINEER =================
+// ================= CREATE ENGINEER =================
 exports.createEngineer = async function (req, res) {
   try {
+
     const hashedPassword = await bcryptJS.hash(req.body.password, 10)
     const username = generateUsername(req.body.name)
 
@@ -99,22 +121,29 @@ exports.createEngineer = async function (req, res) {
 
     let saved = await engineer.save()
 
-    const { password, ...data } = saved._doc
+    const { password, ...user } = saved._doc
 
     res.status(201).json({
+      status: "success",
       message: "Engineer created successfully",
-      user: data
+      data: {
+        user
+      }
     })
 
   } catch (error) {
-    res.status(400).json({ message: error.message })
+    res.status(400).json({
+      status: "error",
+      message: error.message
+    })
   }
 }
 
 
- // ================= CREATE DOCTOR =================
+// ================= CREATE DOCTOR =================
 exports.createDoctor = async function (req, res) {
   try {
+
     const hashedPassword = await bcryptJS.hash(req.body.password, 10)
     const username = generateUsername(req.body.name)
 
@@ -130,22 +159,29 @@ exports.createDoctor = async function (req, res) {
 
     let saved = await doctor.save()
 
-    const { password, ...data } = saved._doc
+    const { password, ...user } = saved._doc
 
     res.status(201).json({
+      status: "success",
       message: "Doctor created successfully",
-      user: data
+      data: {
+        user
+      }
     })
 
   } catch (error) {
-    res.status(400).json({ message: error.message })
+    res.status(400).json({
+      status: "error",
+      message: error.message
+    })
   }
 }
 
 
- // ================= CREATE NURSE =================
+// ================= CREATE NURSE =================
 exports.createNurse = async function (req, res) {
   try {
+
     const hashedPassword = await bcryptJS.hash(req.body.password, 10)
     const username = generateUsername(req.body.name)
 
@@ -161,22 +197,29 @@ exports.createNurse = async function (req, res) {
 
     let saved = await nurse.save()
 
-    const { password, ...data } = saved._doc
+    const { password, ...user } = saved._doc
 
     res.status(201).json({
+      status: "success",
       message: "Nurse created successfully",
-      user: data
+      data: {
+        user
+      }
     })
 
   } catch (error) {
-    res.status(400).json({ message: error.message })
+    res.status(400).json({
+      status: "error",
+      message: error.message
+    })
   }
 }
 
 
- // ================= CREATE PARENT =================
+// ================= CREATE PARENT =================
 exports.createParent = async function (req, res) {
   try {
+
     const hashedPassword = await bcryptJS.hash(req.body.password, 10)
     const username = generateUsername(req.body.name)
 
@@ -192,14 +235,20 @@ exports.createParent = async function (req, res) {
 
     let saved = await parent.save()
 
-    const { password, ...data } = saved._doc
+    const { password, ...user } = saved._doc
 
     res.status(201).json({
+      status: "success",
       message: "Parent created successfully",
-      user: data
+      data: {
+        user
+      }
     })
 
   } catch (error) {
-    res.status(400).json({ message: error.message })
+    res.status(400).json({
+      status: "error",
+      message: error.message
+    })
   }
 }
