@@ -12,13 +12,12 @@ router.post(
 )
 
 // ================= CREATE ENGINEER =================
-// router.post(
-//   '/create-engineer',
-//   auth,
-//   roleMiddleware(['engineer']),
-//   userController.createEngineer
-// )
-router.post('/create-engineer', userController.createEngineer)
+router.post(
+  '/create-engineer',
+  auth,
+  roleMiddleware(['engineer']),
+  userController.createEngineer
+)
 
 
 
