@@ -44,9 +44,14 @@ function getDisplayName(role, name) {
 // ================= LOGIN =================
 exports.login = async function (req, res) {
   try {
+  const identifier = req.body.identifier.toLowerCase()
 
-    let user = await userModule.findOne({ email: req.body.email })
-
+ let user = await userModule.findOne({
+  $or: [
+    { email: req.body.identifier },
+    { username: req.body.identifier }
+  ]
+  })
     if (!user) {
       return res.status(401).json({
         status: "error",
