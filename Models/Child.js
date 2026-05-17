@@ -2,25 +2,54 @@ const mongoose = require('mongoose')
 
 const childSchema = new mongoose.Schema({
 
-  name: {
+  childName: {
     type: String,
     required: true,
     trim: true
   },
 
-  age: {
+  fatherName: {
+    type: String,
+    required: true
+  },
+
+  motherName: {
+    type: String,
+    required: true
+  },
+
+  birthWeek: {
     type: Number,
     default: null
   },
 
-  gender: {
-    type: String,
-    enum: ['male', 'female'],
+  birthWeight: {
+    type: Number,
     default: null
   },
 
-  // ================= RELATIONS =================
+  currentWeight: {
+    type: Number,
+    default: null
+  },
 
+  medicalCondition: {
+    type: String,
+    default: ""
+  },
+
+  bloodType: {
+    type: String,
+    enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
+    default: null
+  },
+
+  admissionDate: {
+    type: Date,
+    default: Date.now
+  },
+
+  // العلاقات
   parentId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -33,13 +62,17 @@ const childSchema = new mongoose.Schema({
     default: null
   },
 
-  engineerId: {
+  nurseId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     default: null
   },
 
-  // ================= INCUBATOR STATUS =================
+  engineerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
+  },
 
   incubatorStatus: {
     type: String,
@@ -47,8 +80,6 @@ const childSchema = new mongoose.Schema({
     default: 'stable'
   }
 
-}, {
-  timestamps: true
-})
+}, { timestamps: true })
 
 module.exports = mongoose.model('Child', childSchema)

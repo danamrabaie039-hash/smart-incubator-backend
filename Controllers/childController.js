@@ -7,15 +7,27 @@ exports.createChild = async function (req, res) {
 
     const child = new Child({
 
-      name: req.body.name,
+      childName: req.body.childName,
 
-      age: req.body.age,
+      fatherName: req.body.fatherName,
 
-      gender: req.body.gender,
+      motherName: req.body.motherName,
+
+      birthWeek: req.body.birthWeek,
+
+      birthWeight: req.body.birthWeight,
+
+      currentWeight: req.body.currentWeight,
+
+      medicalCondition: req.body.medicalCondition,
+
+      bloodType: req.body.bloodType,
 
       parentId: req.body.parentId,
 
       doctorId: req.body.doctorId,
+
+      nurseId: req.body.nurseId,
 
       engineerId: req.user._id
 
