@@ -44,14 +44,16 @@ function getDisplayName(role, name) {
 // ================= LOGIN =================
 exports.login = async function (req, res) {
   try {
-  const identifier = req.body.identifier.toLowerCase()
 
- let user = await userModule.findOne({
-  $or: [
-    { email: req.body.identifier },
-    { username: req.body.identifier }
-  ]
-  })
+    const identifier = req.body.identifier.trim().toLowerCase()
+
+    let user = await userModule.findOne({
+      $or: [
+        { email: identifier },
+        { username: identifier }
+      ]
+    })
+
     if (!user) {
       return res.status(401).json({
         status: "error",
@@ -76,7 +78,7 @@ exports.login = async function (req, res) {
         name: user.name,
         role: normalizedRole
       },
-      'incubator_secret_key',
+      process.env.JWT_SECRET,
       { expiresIn: '1d' }
     )
 
@@ -104,7 +106,6 @@ exports.login = async function (req, res) {
     })
   }
 }
-
 
 // ================= CREATE ENGINEER =================
 exports.createEngineer = async function (req, res) {
