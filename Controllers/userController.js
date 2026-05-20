@@ -2,7 +2,6 @@ const userModule = require('../Models/User')
 const bcryptJS = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
-
 // ================= USERNAME GENERATOR =================
 function generateUsername(fullName) {
   const names = fullName
@@ -22,15 +21,14 @@ function generateUsername(fullName) {
   return `${firstInitial}.${secondInitial}.${lastName}`
 }
 
-
 // ================= BADGE =================
 function getBadge(role) {
   if (role === "doctor") return "DR"
   if (role === "nurse") return "NUR"
   if (role === "engineer") return "ENG"
+  if (role === "admin") return "ADM"
   return "PARENT"
 }
-
 
 // ================= DISPLAY NAME =================
 function getDisplayName(role, name) {
@@ -40,12 +38,11 @@ function getDisplayName(role, name) {
   return name
 }
 
-
 // ================= LOGIN =================
 exports.login = async function (req, res) {
   try {
 
-    const identifier = req.body.identifier.trim().toLowerCase()
+    const identifier = (req.body.identifier || "").trim().toLowerCase()
 
     let user = await userModule.findOne({
       $or: [
@@ -107,146 +104,35 @@ exports.login = async function (req, res) {
   }
 }
 
-// ================= CREATE ENGINEER =================
-exports.createEngineer = async function (req, res) {
+// ================= CREATE USER (ADMIN ONLY) =================
+exports.createUser = async function (req, res) {
   try {
 
-    const hashedPassword = await bcryptJS.hash(req.body.password, 10)
-    const username = generateUsername(req.body.name)
+    const { name, email, password, phone, role } = req.body
 
-    let engineer = new userModule({
-      name: req.body.name,
-      username: username,
-      displayName: getDisplayName("engineer", req.body.name),
-      badge: getBadge("engineer"),
-      email: req.body.email,
+    const hashedPassword = await bcryptJS.hash(password, 10)
+    const username = generateUsername(name)
+
+    let user = new userModule({
+      name,
+      email,
+      phone,
+      username,
+      displayName: getDisplayName(role, name),
+      badge: getBadge(role),
       password: hashedPassword,
-      role: "engineer"
+      role
     })
 
-    let saved = await engineer.save()
+    let saved = await user.save()
 
-    const { password, ...user } = saved._doc
+    const { password: _, ...userData } = saved._doc
 
     res.status(201).json({
       status: "success",
-      message: "Engineer created successfully",
+      message: `${role} created successfully`,
       data: {
-        user
-      }
-    })
-
-  } catch (error) {
-    res.status(400).json({
-      status: "error",
-      message: error.message
-    })
-  }
-}
-
-
-// ================= CREATE DOCTOR =================
-exports.createDoctor = async function (req, res) {
-  try {
-
-    const hashedPassword = await bcryptJS.hash(req.body.password, 10)
-    const username = generateUsername(req.body.name)
-
-    let doctor = new userModule({
-      name: req.body.name,
-      username: username,
-      displayName: getDisplayName("doctor", req.body.name),
-      badge: getBadge("doctor"),
-      email: req.body.email,
-      password: hashedPassword,
-      role: "doctor"
-    })
-
-    let saved = await doctor.save()
-
-    const { password, ...user } = saved._doc
-
-    res.status(201).json({
-      status: "success",
-      message: "Doctor created successfully",
-      data: {
-        user
-      }
-    })
-
-  } catch (error) {
-    res.status(400).json({
-      status: "error",
-      message: error.message
-    })
-  }
-}
-
-
-// ================= CREATE NURSE =================
-exports.createNurse = async function (req, res) {
-  try {
-
-    const hashedPassword = await bcryptJS.hash(req.body.password, 10)
-    const username = generateUsername(req.body.name)
-
-    let nurse = new userModule({
-      name: req.body.name,
-      username: username,
-      displayName: getDisplayName("nurse", req.body.name),
-      badge: getBadge("nurse"),
-      email: req.body.email,
-      password: hashedPassword,
-      role: "nurse"
-    })
-
-    let saved = await nurse.save()
-
-    const { password, ...user } = saved._doc
-
-    res.status(201).json({
-      status: "success",
-      message: "Nurse created successfully",
-      data: {
-        user
-      }
-    })
-
-  } catch (error) {
-    res.status(400).json({
-      status: "error",
-      message: error.message
-    })
-  }
-}
-
-
-// ================= CREATE PARENT =================
-exports.createParent = async function (req, res) {
-  try {
-
-    const hashedPassword = await bcryptJS.hash(req.body.password, 10)
-    const username = generateUsername(req.body.name)
-
-    let parent = new userModule({
-      name: req.body.name,
-      username: username,
-      displayName: getDisplayName("parent", req.body.name),
-      badge: getBadge("parent"),
-      email: req.body.email,
-      password: hashedPassword,
-      role: "parent"
-    })
-
-    let saved = await parent.save()
-
-    const { password, ...user } = saved._doc
-
-    res.status(201).json({
-      status: "success",
-      message: "Parent created successfully",
-      data: {
-        user
+        user: userData
       }
     })
 

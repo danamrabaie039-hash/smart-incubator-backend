@@ -11,39 +11,12 @@ router.post(
   userController.login
 )
 
-// ================= CREATE ENGINEER =================
+// ================= CREATE USER (ADMIN ONLY) =================
 router.post(
-  '/create-engineer',
+  '/create-user',
   auth,
-  roleMiddleware(['engineer']),
-  userController.createEngineer
-)
-
-
-
-
-// ================= CREATE DOCTOR =================
-router.post(
-  '/create-doctor',
-  auth,
-  roleMiddleware(['engineer']),
-  userController.createDoctor
-)
-
-// ================= CREATE NURSE =================
-router.post(
-  '/create-nurse',
-  auth,
-  roleMiddleware(['engineer']),
-  userController.createNurse
-)
-
-// ================= CREATE PARENT =================
-router.post(
-  '/create-parent',
-  auth,
-  roleMiddleware(['engineer']),
-  userController.createParent
+  roleMiddleware(['admin']),
+  userController.createUser
 )
 
 module.exports = router
