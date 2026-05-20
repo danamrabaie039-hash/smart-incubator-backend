@@ -35,6 +35,7 @@ function getDisplayName(role, name) {
   if (role === "doctor") return `Dr. ${name}`
   if (role === "nurse") return `Nurse ${name}`
   if (role === "engineer") return `Eng. ${name}`
+  if (role === "admin") return `Admin ${name}`
   return name
 }
 
@@ -109,6 +110,11 @@ exports.createUser = async function (req, res) {
   try {
 
     const { name, email, password, phone, role } = req.body
+    const allowedRoles = ["admin", "engineer", "doctor", "nurse", "parent"]
+
+   if (!allowedRoles.includes(role)) {
+  return res.status(400).json({ message: "Invalid role" })
+   }
 
     const hashedPassword = await bcryptJS.hash(password, 10)
     const username = generateUsername(name)
