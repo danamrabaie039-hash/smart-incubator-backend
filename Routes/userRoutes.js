@@ -4,6 +4,7 @@ const router = express.Router()
 const userController = require('../Controllers/userController')
 const auth = require('../Middleware/auth')
 const roleMiddleware = require('../Middleware/roleMiddleware')
+router.post('/bootstrap-admin', userController.bootstrapAdmin)
 
 // ================= LOGIN =================
 router.post(

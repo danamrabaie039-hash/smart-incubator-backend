@@ -149,3 +149,33 @@ exports.createUser = async function (req, res) {
     })
   }
 }
+exports.bootstrapAdmin = async (req, res) => {
+  const bcrypt = require('bcryptjs')
+
+  try {
+    const hashedPassword = await bcrypt.hash("Admin#123", 10)
+
+    const admin = new userModule({
+      name: "System Admin",
+      email: "admin@smart-incubator.com",
+      username: "s.a.admin",
+      displayName: "Admin System Admin",
+      badge: "ADM",
+      password: hashedPassword,
+      role: "admin"
+    })
+
+    await admin.save()
+
+    res.status(201).json({
+      status: "success",
+      message: "Admin created successfully"
+    })
+
+  } catch (error) {
+    res.status(400).json({
+      status: "error",
+      message: error.message
+    })
+  }
+}
