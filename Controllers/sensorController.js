@@ -12,7 +12,8 @@ exports.createSensorData = async (req, res) => {
   try {
 
     const {
-      temperature,
+      incubatorTemperature,
+      babyTemperature,
       humidity,
       oxygenSaturation,
       heartRate,
@@ -46,7 +47,8 @@ const incubatorId = incubator._id
     const sensor = await Sensor.create({
       incubatorId,
       childId: child._id,
-      temperature,
+      incubatorTemperature,
+      babyTemperature,
       humidity,
       oxygenSaturation,
       heartRate,
@@ -59,7 +61,8 @@ const incubatorId = incubator._id
 
     // ================= 3. ALERT ENGINE =================
     const alerts = calculateAlertLevel({
-      temperature,
+      incubatorTemperature,
+      babyTemperature,
       humidity,
       oxygenSaturation,
       heartRate,
@@ -86,7 +89,8 @@ const incubatorId = incubator._id
         message: alert.message,
         status: "active",
         sensorSnapshot: {
-          temperature,
+          incubatorTemperature,
+          babyTemperature,
           humidity,
           oxygenSaturation,
           heartRate,
@@ -142,7 +146,8 @@ exports.mockSensorData = async (req, res) => {
     // 2. save sensor reading
     const sensor = await Sensor.create({
       incubatorId,
-      temperature,
+      incubatorTemperature,
+      babyTemperature,
       oxygenSaturation,
       heartRate,
       humidity,
@@ -161,7 +166,8 @@ exports.mockSensorData = async (req, res) => {
 
     // ================= ALERT ENGINE (same as real system) =================
     const alerts = calculateAlertLevel({
-      temperature,
+      incubatorTemperature,
+      babyTemperature,
       humidity,
       oxygenSaturation,
       heartRate,
@@ -188,7 +194,8 @@ exports.mockSensorData = async (req, res) => {
         message: alert.message,
         status: "active",
         sensorSnapshot: {
-          temperature,
+          incubatorTemperature,
+          babyTemperature,
           humidity,
           oxygenSaturation,
           heartRate,

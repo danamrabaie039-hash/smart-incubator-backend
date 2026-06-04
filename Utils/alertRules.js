@@ -5,7 +5,8 @@ exports.calculateAlertLevel = (sensor) => {
   const alerts = []
 
   const {
-    temperature,
+    incubatorTemperature,
+    babyTemperature,
     oxygenSaturation,
     heartRate,
     soundLevel
@@ -13,31 +14,55 @@ exports.calculateAlertLevel = (sensor) => {
 
 
   // ================= TEMPERATURE =================
-  if (temperature >= 40) {
+if (incubatorTemperature >= 40) {
 
-    alerts.push({
-      type: "high_temperature",
-      level: "critical",
-      message: "Dangerous critical temperature detected"
-    })
+  alerts.push({
+    type: "high_incubator_temperature",
+    level: "critical",
+    message: "Dangerous incubator temperature detected"
+  })
 
-  } else if (temperature >= 39) {
+} else if (incubatorTemperature >= 39) {
 
-    alerts.push({
-      type: "high_temperature",
-      level: "high",
-      message: "Critical high temperature detected"
-    })
+  alerts.push({
+    type: "high_incubator_temperature",
+    level: "high",
+    message: "Critical incubator temperature detected"
+  })
 
-  } else if (temperature >= 38) {
+} else if (incubatorTemperature >= 38) {
 
-    alerts.push({
-      type: "high_temperature",
-      level: "medium",
-      message: "Moderate temperature rise detected"
-    })
-  }
+  alerts.push({
+    type: "high_incubator_temperature",
+    level: "medium",
+    message: "Moderate incubator temperature rise detected"
+  })
+}
 
+if (babyTemperature >= 38) {
+
+  alerts.push({
+    type: "high_baby_temperature",
+    level: "critical",
+    message: "Dangerous baby temperature detected"
+  })
+
+} else if (babyTemperature >= 37.5) {
+
+  alerts.push({
+    type: "high_baby_temperature",
+    level: "high",
+    message: "High baby temperature detected"
+  })
+
+} else if (babyTemperature >= 37) {
+
+  alerts.push({
+    type: "high_baby_temperature",
+    level: "medium",
+    message: "Slightly elevated baby temperature detected"
+  })
+}
 
   // ================= OXYGEN =================
   if (oxygenSaturation < 85) {

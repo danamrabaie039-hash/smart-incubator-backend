@@ -12,13 +12,16 @@ childId: {
   ref: "Child",
   required: true
  },
- 
+
   // 🟡 Incubator environment
-  temperature: {
+  incubatorTemperature: {
     type: Number,
     required: true
   },
-
+babyTemperature: {
+  type: Number,
+  required: true
+},
   humidity: {
     type: Number,
     required: true
@@ -41,11 +44,6 @@ childId: {
     default: null
   },
 
-  // 🟡 actual reading time (important for medical logs)
-  // timestamp: {
-  //   type: Date,
-  //   default: Date.now
-  // }
 
 }, {
   timestamps: true
