@@ -14,7 +14,12 @@ router.post(
   sensorDeviceAuth,
   sensorController.createSensorData
 )
-
+router.get('/device-test/:id', (req, res) => {
+  res.json({
+    heater: true,
+    fan: false
+  })
+})
 
 // ================= USER (DOCTOR / NURSE VIEW) =================
 router.get(
