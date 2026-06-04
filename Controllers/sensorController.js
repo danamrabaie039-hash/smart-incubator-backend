@@ -20,11 +20,20 @@ exports.createSensorData = async (req, res) => {
     } = req.body
 
     // 🔥 incubator comes from middleware (API KEY)
-    const incubator = req.incubator
-    const incubatorId = incubator._id
+const incubator = req.incubator
+
+if (!incubator) {
+  return res.status(401).json({
+    status: "error",
+    message: "Device not authorized or incubator missing"
+  })
+}
+
+const incubatorId = incubator._id
 
     // ================= 1. Get child =================
     const child = await Child.findOne({ incubatorId })
+    console.log("🔥 CHILD CHECK:", child)
 
     if (!child) {
       return res.status(404).json({
