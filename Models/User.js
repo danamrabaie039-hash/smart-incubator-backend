@@ -52,10 +52,16 @@ const userSchema = new Schema({
 
   role: {
     type: String,
-    enum: ["admin", "engineer", "doctor", "nurse", "parent"],
-    default: "parent",
+    enum: ["admin", "engineer", "doctor", "nurse"],
+    default: "nurse",
     lowercase: true
-  }
+  },
+
+  
+  isActive: {
+  type: Boolean,
+  default: true
+}
 
 }, { timestamps: true })
 

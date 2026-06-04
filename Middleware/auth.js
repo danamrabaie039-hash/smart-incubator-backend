@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken')
 
 module.exports = (req, res, next) => {
   try {
+    console.log("🔥 AUTH HIT")
 
     const authHeader = req.headers.authorization || ""
 
@@ -18,6 +19,9 @@ module.exports = (req, res, next) => {
     next()
 
   } catch (error) {
-    res.status(401).json({ message: "Invalid Token" })
-  }
+  return res.status(401).json({
+    status: "error",
+    message: "Invalid Token"
+  })
+ }
 }

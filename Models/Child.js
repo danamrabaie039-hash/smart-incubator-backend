@@ -4,8 +4,7 @@ const childSchema = new mongoose.Schema({
 
   childName: {
     type: String,
-    required: true,
-    trim: true
+    required: true
   },
 
   fatherName: {
@@ -18,19 +17,35 @@ const childSchema = new mongoose.Schema({
     required: true
   },
 
+  birthDate: {
+    type: Date,
+    required: true
+  },
+
   birthWeek: {
     type: Number,
-    default: null
+    required: true
+  },
+
+  gender: {
+    type: String,
+    enum: ['male', 'female'],
+    required: true
+  },
+
+  bloodType: {
+    type: String,
+    required: true
   },
 
   birthWeight: {
     type: Number,
-    default: null
+    required: true
   },
 
   currentWeight: {
     type: Number,
-    default: null
+    required: true
   },
 
   medicalCondition: {
@@ -38,48 +53,25 @@ const childSchema = new mongoose.Schema({
     default: ""
   },
 
-  bloodType: {
-    type: String,
-    enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
-    default: null
-  },
-
   admissionDate: {
     type: Date,
     default: Date.now
   },
 
-  // العلاقات
-  parentId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
+status: {
+  type: String,
+  enum: ['active', 'discharged'],
+  default: 'active'
+},
 
-  doctorId: {
+  incubatorId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'Incubator',
     default: null
-  },
-
-  nurseId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    default: null
-  },
-
-  engineerId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    default: null
-  },
-
-  incubatorStatus: {
-    type: String,
-    enum: ['stable', 'warning', 'critical'],
-    default: 'stable'
   }
 
-}, { timestamps: true })
+}, {
+  timestamps: true
+})
 
 module.exports = mongoose.model('Child', childSchema)
