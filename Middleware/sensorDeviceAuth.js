@@ -1,9 +1,12 @@
 const Incubator = require('../Models/Incubator')
 
 module.exports = async (req, res, next) => {
+  console.log("🔥 HEADERS:", req.headers)
+  console.log("🔥 API KEY:", req.headers['x-api-key'])
+
   try {
-    console.log("🔥 SENSOR AUTH HIT")
-console.log("API KEY:", req.headers['x-api-key'])
+
+
 
     const apiKey = req.headers['x-api-key']
 
