@@ -11,7 +11,7 @@ const sensorController = require('../Controllers/sensorController')
 // ================= DEVICE (HARDWARE) =================
 router.post(
   '/',
-  // sensorDeviceAuth,
+  sensorDeviceAuth,
   sensorController.createSensorData
 )
 
