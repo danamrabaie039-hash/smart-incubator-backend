@@ -343,6 +343,19 @@ exports.changePassword = async function (req, res) {
     const userId = req.user._id
     const { currentPassword, newPassword } = req.body
 
+
+    if (!newPassword || newPassword.length < 8) {
+      return res.status(400).json({
+        status: "error",
+        message: "Password must be at least 8 characters"
+      })
+    }
+    if (currentPassword === newPassword) {
+  return res.status(400).json({
+    status: "error",
+    message: "New password must be different from current password"
+  })
+}
     const user = await userModule.findById(userId).select("+password")
 
     if (!user) {
