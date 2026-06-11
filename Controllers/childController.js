@@ -88,16 +88,10 @@ exports.getAllChildren = async function (req, res) {
 
     let children = []
 
-    // ================= ADMIN =================
-    if (role === "admin") {
 
-      children = await childModule.find({
-        status: { $ne: "discharged" }
-      }).populate('incubatorId', 'incubatorName')
-    }
 
     // ================= DOCTOR (READ ONLY FULL) =================
-    else if (role === "doctor") {
+  if (role === "doctor") {
 
       children = await childModule.find({
         status: { $ne: "discharged" }
@@ -146,7 +140,7 @@ exports.getChildById = async function (req, res) {
 
     const role = req.user.role?.toLowerCase()
 
-    if (!["admin", "nurse", "doctor"].includes(role)) {
+    if (![ "nurse", "doctor"].includes(role)) {
       return res.status(403).json({
         status: "error",
         message: "Not allowed"
@@ -217,29 +211,25 @@ exports.updateChild = async function (req, res) {
     }
 
     // ================= ROLE CONTROL =================
+if (role !== "nurse") {
+  return res.status(403).json({
+    status: "error",
+    message: "Only nurses can update child"
+  })
+}
+// ================= ACCESS CHECK =================
+const access = await Access.findOne({
+  userId: req.user._id,
+  childId: req.params.id,
+  accessStatus: "active"
+})
 
-    if (role === "nurse") {
-
-      const access = await Access.findOne({
-        userId: user._id,
-        childId: req.params.id,
-        accessStatus: "active"
-      })
-
-      if (!access) {
-        return res.status(403).json({
-          status: "error",
-          message: "No access to this child"
-        })
-      }
-
-    } 
-    else if (role !== "doctor" && role !== "admin") {
-      return res.status(403).json({
-        status: "error",
-        message: "Only Doctor or Nurse can update child"
-      })
-    }
+if (!access) {
+  return res.status(403).json({
+    status: "error",
+    message: "No access to this child"
+  })
+}
 
     // ================= ALLOWED FIELDS =================
 
@@ -286,13 +276,24 @@ exports.dischargeChild = async function (req, res) {
   try {
 
    const role = req.user.role?.toLowerCase()
-    if (!["doctor", "nurse", "admin"].includes(role)) {
+   if (role !== "nurse") {
       return res.status(403).json({
         status: "error",
         message: "Not allowed"
       })
     }
+const access = await Access.findOne({
+  userId: req.user._id,
+  childId: req.params.id,
+  accessStatus: "active"
+})
 
+if (!access) {
+  return res.status(403).json({
+    status: "error",
+    message: "No access to this child"
+  })
+}
     const child = await childModule.findByIdAndUpdate(
       req.params.id,
       { status: "discharged" },

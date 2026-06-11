@@ -91,6 +91,47 @@ exports.getIncubatorById = async (req, res) => {
   }
 }
 
+exports.setMaintenanceMode = async (req, res) => {
+  try {
+
+    const incubator = await Incubator.findById(req.params.id)
+
+    if (!incubator) {
+      return res.status(404).json({
+        status: "error",
+        message: "Incubator not found"
+      })
+    }
+
+    if (incubator.isOccupied) {
+      return res.status(400).json({
+        status: "error",
+        message: "Cannot set occupied incubator to maintenance mode"
+      })
+    }
+
+    incubator.status = "maintenance"
+    incubator.isOccupied = false
+    incubator.lastMaintenanceDate = new Date()
+    incubator.lastUpdate = new Date()
+
+    await incubator.save()
+
+    return res.status(200).json({
+      status: "success",
+      message: "Incubator set to maintenance mode",
+      data: incubator
+    })
+
+  } catch (error) {
+    return res.status(500).json({
+      status: "error",
+      message: error.message
+    })
+  }
+}
+
+
 // UPDATE
 exports.updateIncubator = async (req, res) => {
   try {
@@ -100,7 +141,7 @@ exports.updateIncubator = async (req, res) => {
       "status",
       "connectionStatus",
       "cameraUrl",
-      "apiKey"
+      
     ]
 
     const updates = {}

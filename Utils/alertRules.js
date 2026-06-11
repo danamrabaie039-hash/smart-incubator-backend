@@ -2,6 +2,7 @@
 
 exports.calculateAlertLevel = (sensor) => {
 
+
   const alerts = []
 
   const {
@@ -17,7 +18,7 @@ exports.calculateAlertLevel = (sensor) => {
 if (incubatorTemperature >= 40) {
 
   alerts.push({
-    type: "high_incubator_temperature",
+    type: "high_temperature",
     level: "critical",
     message: "Dangerous incubator temperature detected"
   })
@@ -25,7 +26,7 @@ if (incubatorTemperature >= 40) {
 } else if (incubatorTemperature >= 39) {
 
   alerts.push({
-    type: "high_incubator_temperature",
+    type: "high_temperature",
     level: "high",
     message: "Critical incubator temperature detected"
   })
@@ -33,7 +34,7 @@ if (incubatorTemperature >= 40) {
 } else if (incubatorTemperature >= 38) {
 
   alerts.push({
-    type: "high_incubator_temperature",
+    type: "high_temperature",
     level: "medium",
     message: "Moderate incubator temperature rise detected"
   })
@@ -42,7 +43,7 @@ if (incubatorTemperature >= 40) {
 if (babyTemperature >= 38) {
 
   alerts.push({
-    type: "high_baby_temperature",
+    type: "high_temperature",
     level: "critical",
     message: "Dangerous baby temperature detected"
   })
@@ -50,7 +51,7 @@ if (babyTemperature >= 38) {
 } else if (babyTemperature >= 37.5) {
 
   alerts.push({
-    type: "high_baby_temperature",
+    type: "high_temperature",
     level: "high",
     message: "High baby temperature detected"
   })
@@ -58,7 +59,7 @@ if (babyTemperature >= 38) {
 } else if (babyTemperature >= 37) {
 
   alerts.push({
-    type: "high_baby_temperature",
+    type: "high_temperature",
     level: "medium",
     message: "Slightly elevated baby temperature detected"
   })
@@ -127,6 +128,31 @@ if (babyTemperature >= 38) {
       message: "Unusual sound detected"
     })
   }
+
+  if (sensor.humidity > 65) {
+  alerts.push({
+    type: 'high_humidity',
+    level: 'high',
+    message: 'High humidity detected'
+  })
+}
+// ================= GAS =================
+if (sensor.gasDetected === true) {
+  alerts.push({
+    type: 'gas_detected',
+    level: 'critical',
+    message: 'Gas detected inside incubator'
+  })
+}
+
+// ================= WATER LEVEL =================
+if (sensor.waterLevel <= 20) {
+  alerts.push({
+    type: 'low_water_level',
+    level: 'high',
+    message: 'Water level is low'
+  })
+}
 
   return alerts
 }

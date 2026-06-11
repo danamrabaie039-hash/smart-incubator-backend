@@ -12,7 +12,7 @@ module.exports = (roles = []) => {
     const userRole = (req.user.role || "").toLowerCase()
 
     // 🟢 1. System validation (ONLY once)
-    const validRoles = ['admin', 'nurse', 'doctor']
+    const validRoles = ['admin', 'nurse', 'doctor', 'engineer']
 
     if (!validRoles.includes(userRole)) {
       return res.status(403).json({

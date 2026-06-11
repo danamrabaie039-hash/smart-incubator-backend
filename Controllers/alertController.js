@@ -5,7 +5,8 @@ const Child = require('../Models/Child')
 
 // ================= ROLE CHECK =================
 const canManageAlerts = (role) => {
-  return ['nurse', 'admin'].includes(role)
+  return role === 'nurse'
+
 }
 
 
@@ -14,11 +15,6 @@ const getAccessibleChildIds = async (user) => {
 
   const role = user.role?.toLowerCase()
 
-  // ADMIN
-  if (role === "admin") {
-    const children = await Child.find().select("_id")
-    return children.map(c => c._id)
-  }
 
   // NURSE فقط
   if (role === "nurse") {
@@ -41,7 +37,7 @@ exports.getAllAlerts = async (req, res) => {
 
     const role = req.user.role?.toLowerCase()
 
-if (role !== "nurse" && role !== "admin") {
+if (!canManageAlerts(role)) {
   return res.status(403).json({
     message: "Alerts not allowed for this role"
   })
@@ -84,7 +80,7 @@ exports.getActiveAlerts = async (req, res) => {
 
     const role = req.user.role?.toLowerCase()
 
-if (role !== "nurse" && role !== "admin") {
+if (!canManageAlerts(role)) {
   return res.status(403).json({
     message: "Alerts not allowed for this role"
   })
@@ -122,13 +118,18 @@ exports.resolveAlert = async (req, res) => {
     const userId = req.user._id
 
     // ================= ROLE CHECK =================
-    if (role !== "nurse" && role !== "admin") {
+    if (!canManageAlerts(role)) {
   return res.status(403).json({
     message: "Alerts not allowed for this role"
   })
 }
 
-    const alert = await Alert.findById(req.params.id)
+    const childIds = await getAccessibleChildIds(req.user)
+
+const alert = await Alert.findOne({
+  _id: req.params.id,
+  childId: { $in: childIds }
+})
 
     if (!alert) {
       return res.status(404).json({
@@ -143,7 +144,7 @@ exports.resolveAlert = async (req, res) => {
       accessStatus: "active"
     })
 
-    if (!access && role !== "admin") {
+    if (!access) {
       return res.status(403).json({
         message: "No permission for this child's alerts"
       })
@@ -179,13 +180,16 @@ exports.ignoreAlert = async (req, res) => {
     const userId = req.user._id
 
     // ================= ROLE CHECK =================
-  if (role !== "nurse" && role !== "admin") {
+  if (!canManageAlerts(role)) {
   return res.status(403).json({
     message: "Alerts not allowed for this role"
   })
 }
 
-    const alert = await Alert.findById(req.params.id)
+    const alert = await Alert.findOne({
+  _id: req.params.id,
+  childId: { $in: childIds }
+})
 
     if (!alert) {
       return res.status(404).json({
@@ -200,7 +204,7 @@ exports.ignoreAlert = async (req, res) => {
       accessStatus: "active"
     })
 
-    if (!access && role !== "admin") {
+    if ( !access) {
       return res.status(403).json({
         message: "No permission for this child's alerts"
       })

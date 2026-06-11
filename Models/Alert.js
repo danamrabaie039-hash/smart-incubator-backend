@@ -13,18 +13,17 @@ const alertSchema = new mongoose.Schema({
     ref: 'Incubator',
     required: true
   },
-
-
-
   alertType: {
     type: String,
-    enum: [
-      'high_temperature',
-      'low_oxygen',
-      'high_heart_rate',
-      'high_humidity',
-      'sound_detected'
-    ],
+ enum: [
+  'high_temperature',
+  'low_oxygen',
+  'high_heart_rate',
+  'high_humidity',
+  'sound_detected',
+  'gas_detected',
+  'low_water_level'
+],
     required: true
   },
 
@@ -49,13 +48,17 @@ const alertSchema = new mongoose.Schema({
 
 
   // 🔥 إضافة مهمة جداً للمستقبل
-  sensorSnapshot: {
-    temperature: Number,
-    oxygenSaturation: Number,
-    heartRate: Number,
-    humidity: Number,
-    soundLevel: Number
-  }
+sensorSnapshot: {
+  incubatorTemperature: Number,
+  babyTemperature: Number,
+  humidity: Number,
+  oxygenSaturation: Number,
+  heartRate: Number,
+  soundLevel: Number,
+  gasDetected: Boolean,
+  alarmActive: Boolean,
+  waterLevel: Number
+}
 
 }, {
   timestamps: true

@@ -7,40 +7,15 @@ const { checkChildAccess } = require('../Middleware/accessMiddleware')
 const sensorDeviceAuth = require('../Middleware/sensorDeviceAuth')
 const sensorController = require('../Controllers/sensorController')
 
+// nurse
+router.get('/nurse/:id', auth, checkChildAccess(), sensorController.getNurseSensorView)
 
-// ================= DEVICE (HARDWARE) =================
-router.post(
-  '/',
-  sensorDeviceAuth,
-  sensorController.createSensorData
-)
-router.get('/device-test/:id', (req, res) => {
-  res.json({
-    heater: true,
-    fan: false
-  })
-})
-
-// ================= USER (DOCTOR / NURSE VIEW) =================
+// engineer
+router.get('/engineer/:id', auth, roleMiddleware(['engineer']), sensorController.getEngineerSensorView)
 router.get(
-  '/latest/:id',
+  '/latest/:incubatorId',
   auth,
-  checkChildAccess('view'),
+  roleMiddleware(['admin', 'doctor', 'nurse']),
   sensorController.getLatestSensorByIncubator
 )
-
-router.get(
-  '/dashboard/:id',
-  auth,
-  checkChildAccess('view'),
-  sensorController.getSensorDashboard
-)
-
-
-// ================= DEV / TEST ONLY =================
-router.post(
-  '/mock',
-  sensorController.mockSensorData
-)
-
 module.exports = router

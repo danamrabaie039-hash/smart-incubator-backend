@@ -28,9 +28,6 @@ const userSchema = new Schema({
     type: String,
     default: ""
   },
-
-  age: Number,
-
   phone: {
     type: String,
     unique: true,

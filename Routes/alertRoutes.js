@@ -13,7 +13,7 @@ const roleMiddleware = require('../Middleware/roleMiddleware')
 router.get(
   '/',
   auth,
-  roleMiddleware(['admin', 'nurse']),
+  roleMiddleware([ 'nurse']),
   alertController.getAllAlerts
 )
 
@@ -23,7 +23,7 @@ router.get(
 router.get(
   '/active',
   auth,
-  roleMiddleware(['admin', 'nurse']),
+  roleMiddleware(['nurse']),
   alertController.getActiveAlerts
 )
 
@@ -32,7 +32,7 @@ router.get(
 router.put(
   '/:id/resolve',
   auth,
-  roleMiddleware(['admin',  'nurse']),
+  roleMiddleware([  'nurse']),
   alertController.resolveAlert
 )
 
@@ -41,7 +41,7 @@ router.put(
 router.put(
   '/:id/ignore',
   auth,
-  roleMiddleware(['admin',  'nurse']),
+  roleMiddleware([ 'nurse']),
   alertController.ignoreAlert
 )
 

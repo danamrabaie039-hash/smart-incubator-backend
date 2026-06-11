@@ -20,7 +20,7 @@ router.post(
 router.get(
   '/',
   auth,
-  roleMiddleware(['admin','doctor','nurse']),
+  roleMiddleware(['doctor','nurse']),
   childController.getAllChildren
 )
 
@@ -37,7 +37,7 @@ router.get(
 router.put(
   '/:id',
   auth,
-  roleMiddleware(['nurse', 'doctor']),
+  roleMiddleware(['nurse']),
   accessMiddleware.checkChildAccess('edit'),
   childController.updateChild
 )
@@ -45,8 +45,9 @@ router.put(
 router.patch(
   '/discharge/:id',
   auth,
- roleMiddleware(['doctor','admin']),
-    childController.dischargeChild
+ roleMiddleware(['nurse']),
+ accessMiddleware.checkChildAccess(),
+  childController.dischargeChild
 ) 
 
 

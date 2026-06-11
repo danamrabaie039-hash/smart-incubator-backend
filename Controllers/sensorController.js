@@ -2,13 +2,11 @@ const Sensor = require('../Models/Sensor')
 const Incubator = require('../Models/Incubator')
 const Child = require('../Models/Child')
 const Alert = require('../Models/Alert')
-
 const { calculateAlertLevel } = require('../Utils/alertRules')
 
 
 // ================= CREATE SENSOR DATA =================
 exports.createSensorData = async (req, res) => {
-
   try {
 
     const {
@@ -17,24 +15,26 @@ exports.createSensorData = async (req, res) => {
       humidity,
       oxygenSaturation,
       heartRate,
-      soundLevel
+      soundLevel,
+      heater,
+      fan,
+      humidifier,
+      exhaust,
+      waterLevel,
+      gasDetected,
+      alarmActive
     } = req.body
 
-    // 🔥 incubator comes from middleware (API KEY)
-const incubator = req.incubator
+    const incubator = req.incubator
 
-if (!incubator) {
-  return res.status(401).json({
-    status: "error",
-    message: "Device not authorized or incubator missing"
-  })
-}
+    if (!incubator) {
+      return res.status(401).json({
+        status: "error",
+        message: "Device not authorized"
+      })
+    }
 
-const incubatorId = incubator._id
-
-    // ================= 1. Get child =================
-    const child = await Child.findOne({ incubatorId })
-    console.log("🔥 CHILD CHECK:", child)
+    const child = await Child.findOne({ incubatorId: incubator._id })
 
     if (!child) {
       return res.status(404).json({
@@ -43,30 +43,38 @@ const incubatorId = incubator._id
       })
     }
 
-    // ================= 2. Save sensor =================
     const sensor = await Sensor.create({
-      incubatorId,
+      incubatorId: incubator._id,
       childId: child._id,
       incubatorTemperature,
       babyTemperature,
       humidity,
       oxygenSaturation,
       heartRate,
-      soundLevel
+      soundLevel,
+      heater,
+      fan,
+      humidifier,
+      exhaust,
+      waterLevel,
+      gasDetected,
+      alarmActive
     })
 
-    await Incubator.findByIdAndUpdate(incubatorId, {
+    await Incubator.findByIdAndUpdate(incubator._id, {
       lastUpdate: new Date()
     })
 
-    // ================= 3. ALERT ENGINE =================
     const alerts = calculateAlertLevel({
       incubatorTemperature,
       babyTemperature,
       humidity,
       oxygenSaturation,
       heartRate,
-      soundLevel
+      soundLevel,
+      gasDetected,
+      alarmActive,
+      waterLevel
     })
 
     const createdAlerts = []
@@ -83,7 +91,7 @@ const incubatorId = incubator._id
 
       const newAlert = await Alert.create({
         childId: child._id,
-        incubatorId,
+        incubatorId: incubator._id,
         alertType: alert.type,
         alertLevel: alert.level,
         message: alert.message,
@@ -94,7 +102,10 @@ const incubatorId = incubator._id
           humidity,
           oxygenSaturation,
           heartRate,
-          soundLevel
+          soundLevel,
+          gasDetected,
+          alarmActive,
+          waterLevel
         }
       })
 
@@ -103,7 +114,6 @@ const incubatorId = incubator._id
 
     return res.status(201).json({
       status: "success",
-      message: "Sensor processed successfully",
       data: {
         sensor,
         alerts: createdAlerts
@@ -119,19 +129,101 @@ const incubatorId = incubator._id
 }
 
 
-// ================= MOCK SENSOR DATA =================
-exports.mockSensorData = async (req, res) => {
+// ================= NURSE VIEW =================
+exports.getNurseSensorView = async (req, res) => {
+  try {
+
+const sensor = await Sensor.findOne({ childId: req.params.id })
+
+    if (!sensor) {
+      return res.status(404).json({
+        status: "error",
+        message: "No sensor data"
+      })
+    }
+
+    return res.json({
+      status: "success",
+      data: {
+        babyTemperature: sensor.babyTemperature,
+        oxygenSaturation: sensor.oxygenSaturation,
+        heartRate: sensor.heartRate,
+        humidity: sensor.humidity,
+        incubatorTemperature: sensor.incubatorTemperature,
+        alarmActive: sensor.alarmActive
+      }
+    })
+
+  } catch (error) {
+    return res.status(500).json({
+      status: "error",
+      message: error.message
+    })
+  }
+}
+
+
+// ================= ENGINEER VIEW =================
+exports.getEngineerSensorView = async (req, res) => {
+  try {
+
+ const sensor = await Sensor.findOne({ incubatorId: req.params.id })
+  .sort({ createdAt: -1 })
+
+    if (!sensor) {
+      return res.status(404).json({
+        status: "error",
+        message: "No sensor data"
+      })
+    }
+
+    return res.json({
+      status: "success",
+      data: {
+        heater: sensor.heater,
+        fan: sensor.fan,
+        humidifier: sensor.humidifier,
+        exhaust: sensor.exhaust,
+        waterLevel: sensor.waterLevel,
+        gasDetected: sensor.gasDetected,
+        alarmActive: sensor.alarmActive
+      }
+    })
+
+  } catch (error) {
+    return res.status(500).json({
+      status: "error",
+      message: error.message
+    })
+  }
+}
+
+
+// ================= RAW DATA =================
+exports.getSensorRaw = async (req, res) => {
+  try {
+
+    const data = await Sensor.find({
+      incubatorId: req.params.id
+    }).sort({ createdAt: -1 })
+
+    return res.json({
+      status: "success",
+      data
+    })
+
+  } catch (error) {
+    return res.status(500).json({
+      status: "error",
+      message: error.message
+    })
+  }
+}
+exports.getLatestSensorByIncubator = async (req, res) => {
 
   try {
 
-    const {
-      incubatorId,
-      temperature,
-      oxygenSaturation,
-      heartRate,
-      humidity,
-      soundLevel
-    } = req.body
+    const { incubatorId } = req.params
 
     // 1. check incubator
     const incubator = await Incubator.findById(incubatorId)
@@ -143,174 +235,34 @@ exports.mockSensorData = async (req, res) => {
       })
     }
 
-    // 2. save sensor reading
-    const sensor = await Sensor.create({
-      incubatorId,
-      incubatorTemperature,
-      babyTemperature,
-      oxygenSaturation,
-      heartRate,
-      humidity,
-      soundLevel
-    })
+    // 2. get latest sensor reading
+    const sensor = await Sensor.findOne({ incubatorId })
+      .sort({ createdAt: -1 })
 
-    // 3. get child linked to incubator
-    const child = await Child.findOne({ incubatorId })
-
-    if (!child) {
-      return res.status(404).json({
-        status: "error",
-        message: "No child assigned"
-      })
-    }
-
-    // ================= ALERT ENGINE (same as real system) =================
-    const alerts = calculateAlertLevel({
-      incubatorTemperature,
-      babyTemperature,
-      humidity,
-      oxygenSaturation,
-      heartRate,
-      soundLevel
-    })
-
-    const createdAlerts = []
-
-    for (const alert of alerts) {
-
-      const existingAlert = await Alert.findOne({
-        childId: child._id,
-        alertType: alert.type,
-        status: "active"
-      })
-
-      if (existingAlert) continue
-
-      const newAlert = await Alert.create({
-        childId: child._id,
-        incubatorId,
-        alertType: alert.type,
-        alertLevel: alert.level,
-        message: alert.message,
-        status: "active",
-        sensorSnapshot: {
-          incubatorTemperature,
-          babyTemperature,
-          humidity,
-          oxygenSaturation,
-          heartRate,
-          soundLevel
-        }
-      })
-
-      createdAlerts.push(newAlert)
-    }
-
-    return res.status(200).json({
-      status: "success",
-      message: "Sensor processed",
-      data: {
-        sensor,
-        alerts: createdAlerts
-      }
-    })
-
-  } catch (error) {
-    return res.status(500).json({
-      status: "error",
-      message: error.message
-    })
-  }
-}
-
-
-// ================= GET SENSOR DATA BY INCUBATOR =================
-exports.getSensorByIncubator = async (req, res) => {
-
-  try {
-
-    const data = await Sensor.find({
-      incubatorId: req.params.id
-    }).sort({ createdAt: -1 })
-
-    return res.status(200).json({
-      status: "success",
-      results: data.length,
-      data
-    })
-
-  } catch (error) {
-    return res.status(500).json({
-      status: "error",
-      message: error.message
-    })
-  }
-}
-
-
-// ================= GET LATEST SENSOR =================
-exports.getLatestSensorByIncubator = async (req, res) => {
-
-  try {
-
-    const data = await Sensor.findOne({
-      incubatorId: req.params.id
-    }).sort({ createdAt: -1 })
-
-    if (!data) {
+    if (!sensor) {
       return res.status(404).json({
         status: "error",
         message: "No sensor data found"
       })
     }
 
-    return res.status(200).json({
-      status: "success",
-      data
-    })
-
-  } catch (error) {
-    return res.status(500).json({
-      status: "error",
-      message: error.message
-    })
-  }
-}
-
-
-// ================= DASHBOARD =================
-exports.getSensorDashboard = async (req, res) => {
-
-  try {
-
-    const incubatorId = req.params.id
-
-    const latestSensor = await Sensor.findOne({
-      incubatorId
-    }).sort({ createdAt: -1 })
-
-    const child = await Child.findOne({
-      incubatorId
-    })
-
-    if (!child) {
-      return res.status(404).json({
-        status: "error",
-        message: "No child assigned to this incubator"
-      })
-    }
-
-    const accessList = await require('../Models/UserChildAccess').find({
-      childId: child._id,
-      accessStatus: "active"
-    }).populate("userId")
+    // 3. get child
+    const child = await Child.findOne({ incubatorId })
 
     return res.status(200).json({
       status: "success",
       data: {
-        sensor: latestSensor,
-        child,
-        accessList
+        sensor,
+        incubator: {
+          id: incubator._id,
+          name: incubator.incubatorName,
+          status: incubator.status,
+          connectionStatus: incubator.connectionStatus
+        },
+        child: child ? {
+          id: child._id,
+          name: child.childName
+        } : null
       }
     })
 

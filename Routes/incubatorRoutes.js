@@ -6,49 +6,50 @@ const controller = require('../Controllers/incubatorController')
 const auth = require('../Middleware/auth')
 const roleMiddleware = require('../Middleware/roleMiddleware')
 
-
-// ================= CREATE =================
 router.post(
   '/',
   auth,
-  roleMiddleware(['admin', 'engineer']),
+  roleMiddleware(['engineer']),
   controller.createIncubator
 )
-
-
-// ================= GET ALL =================
 router.get(
   '/',
   auth,
-  roleMiddleware(['admin', 'doctor', 'engineer']),
+  roleMiddleware(['engineer']),
   controller.getAllIncubators
 )
 
-
-// ================= GET BY ID =================
 router.get(
   '/:id',
   auth,
-  roleMiddleware(['admin', 'doctor', 'engineer']),
+  roleMiddleware(['engineer']),
   controller.getIncubatorById
 )
 
-
-// ================= UPDATE =================
 router.put(
   '/:id',
   auth,
-  roleMiddleware(['admin', 'engineer']),
+  roleMiddleware(['engineer']),
   controller.updateIncubator
 )
 
-
-// ================= MAINTENANCE MODE (IMPORTANT) =================
 router.patch(
   '/:id/maintenance',
   auth,
-  roleMiddleware(['admin', 'engineer']),
+  roleMiddleware(['engineer']),
   controller.setMaintenanceMode
 )
+router.get(
+  '/',
+  auth,
+  roleMiddleware(['engineer']),
+  controller.getAllIncubators
+)
 
+router.get(
+  '/:id',
+  auth,
+  roleMiddleware(['engineer']),
+  controller.getIncubatorById
+)
 module.exports = router

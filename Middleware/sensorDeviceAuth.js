@@ -1,13 +1,7 @@
 const Incubator = require('../Models/Incubator')
 
 module.exports = async (req, res, next) => {
-  console.log("🔥 HEADERS:", req.headers)
-  console.log("🔥 API KEY:", req.headers['x-api-key'])
-
   try {
-
-
-
     const apiKey = req.headers['x-api-key']
 
     if (!apiKey) {
