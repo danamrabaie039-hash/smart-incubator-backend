@@ -43,6 +43,7 @@ exports.createChild = async function (req, res) {
       })
     }
 
+    const { apiKey, ...safeIncubator } = incubator.toObject()
     // ================= CHILD =================
     const child = await childModule.create({
       childName,
@@ -68,7 +69,8 @@ exports.createChild = async function (req, res) {
     return res.status(201).json({
       status: "success",
       message: "Child created successfully",
-      data: { child, incubator }
+      data: { child, 
+        incubator:safeIncubator }
     })
 
   } catch (error) {

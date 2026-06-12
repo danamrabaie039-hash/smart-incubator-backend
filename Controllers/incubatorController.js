@@ -49,6 +49,7 @@ exports.getAllIncubators = async (req, res) => {
   try {
 
     const data = await Incubator.find()
+      .select('-apiKey')
       .sort({ createdAt: -1 })
 
     return res.status(200).json({
@@ -70,6 +71,7 @@ exports.getIncubatorById = async (req, res) => {
   try {
 
     const data = await Incubator.findById(req.params.id)
+    .select('-apiKey')
 
     if (!data) {
       return res.status(404).json({
@@ -176,41 +178,6 @@ exports.updateIncubator = async (req, res) => {
     return res.status(500).json({
       status: "error",
       message: err.message
-    })
-  }
-}
-
-exports.setMaintenanceMode = async (req, res) => {
-  try {
-
-    const updated = await Incubator.findByIdAndUpdate(
-      req.params.id,
-      {
-        status: "maintenance",
-        isOccupied: false,
-        lastMaintenanceDate: new Date(),
-        lastUpdate: new Date()
-      },
-      { new: true }
-    )
-
-    if (!updated) {
-      return res.status(404).json({
-        status: "error",
-        message: "Incubator not found"
-      })
-    }
-
-    return res.status(200).json({
-      status: "success",
-      message: "Incubator set to maintenance mode",
-      data: updated
-    })
-
-  } catch (error) {
-    return res.status(500).json({
-      status: "error",
-      message: error.message
     })
   }
 }

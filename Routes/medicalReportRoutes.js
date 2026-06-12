@@ -19,7 +19,7 @@ router.post(
 router.get(
   '/',
   auth,
-  roleMiddleware(['doctor']),
+  roleMiddleware(['doctor' ,'nurse']),
   medicalReportController.getMedicalReports
 )
 
@@ -27,7 +27,7 @@ router.get(
 router.get(
   '/:id',
   auth,
-  roleMiddleware(['doctor']),
+  roleMiddleware(['doctor', 'nurse']),
   medicalReportController.getMedicalReportById
 )
 

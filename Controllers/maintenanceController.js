@@ -118,6 +118,46 @@ exports.getMaintenance = async (req, res) => {
     })
   }
 }
+
+// ================= GET MAINTENANCE BY ID =================
+exports.getMaintenanceById = async (req, res) => {
+  try {
+
+    const role = req.user.role?.toLowerCase()
+
+    const maintenance = await Maintenance.findById(req.params.id)
+      .populate('incubatorId', 'incubatorName')
+      .populate('engineerId', 'name role')
+
+    if (!maintenance) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Maintenance not found'
+      })
+    }
+
+    if (
+      role !== 'engineer' ||
+      maintenance.engineerId._id.toString() !== req.user._id.toString()
+    ) {
+      return res.status(403).json({
+        status: 'error',
+        message: 'Not allowed to view this record'
+      })
+    }
+
+    return res.status(200).json({
+      status: 'success',
+      data: maintenance
+    })
+
+  } catch (error) {
+    return res.status(500).json({
+      status: 'error',
+      message: error.message
+    })
+  }
+}
 // ================= UPDATE MAINTENANCE =================
 exports.updateMaintenance = async (req, res) => {
   try {

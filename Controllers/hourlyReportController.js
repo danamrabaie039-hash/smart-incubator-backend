@@ -7,7 +7,9 @@ const isAdmin = (role) => role === 'admin'
 // ================= CREATE HOURLY REPORT (NURSE ONLY) =================
 exports.createHourlyReport = async (req, res) => {
   try {
+       
     const role = req.user.role?.toLowerCase()
+
 
     if (role !== 'nurse') {
       return res.status(403).json({
@@ -74,6 +76,10 @@ exports.createHourlyReport = async (req, res) => {
       notes
     })
 
+  const fullReport = await HourlyReport.findById(report._id)
+ 
+ 
+  
     return res.status(201).json({
       status: 'success',
       message: 'Hourly report created successfully',
@@ -146,7 +152,7 @@ exports.getHourlyReportById = async (req, res) => {
     const report = await HourlyReport.findById(req.params.id)
       .populate('childId', 'childName')
       .populate('incubatorId', 'incubatorName')
-      .populate('nurseId', 'name role')
+      // .populate('nurseId', 'name role')
 
     if (!report) {
       return res.status(404).json({

@@ -33,6 +33,12 @@ router.put(
   maintenanceController.updateMaintenance
 )
 
+router.get(
+  '/:id',
+  auth,
+  roleMiddleware(['engineer']),
+  maintenanceController.getMaintenanceById
+)
 
 // ================= ARCHIVE MAINTENANCE =================
 router.patch(
