@@ -25,15 +25,15 @@ const hourlyReportSchema = new mongoose.Schema({
     required: true
   },
 
-incubatorTemperature: {
-  type: Number,
-  default: null
-},
+// incubatorTemperature: {
+//   type: Number,
+//   default: null
+// },
 
- humidity: {
-  type: Number,
-  default: null
-},
+//  humidity: {
+//   type: Number,
+//   default: null
+// },
 
   oxygenSaturation: {
     type: Number,

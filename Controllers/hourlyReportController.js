@@ -21,8 +21,6 @@ exports.createHourlyReport = async (req, res) => {
     const {
       childId,
       babyTemperature,
-      incubatorTemperature,
-      humidity,
       oxygenSaturation,
       heartRate,
       weight,
@@ -66,8 +64,6 @@ exports.createHourlyReport = async (req, res) => {
       incubatorId: child.incubatorId,
       nurseId: req.user._id,
       babyTemperature,
-      incubatorTemperature,
-      humidity,
       oxygenSaturation,
       heartRate,
       weight,
@@ -241,8 +237,6 @@ exports.updateHourlyReport = async (req, res) => {
 
     const allowedFields = [
       'babyTemperature',
-      'incubatorTemperature',
-      'humidity',
       'oxygenSaturation',
       'heartRate',
       'weight',
