@@ -40,11 +40,6 @@ babyTemperature: {
     required: true
   },
 
-  // 🟡 optional future AI feature (cry detection)
-  soundLevel: {
-    type: Number,
-    default: null
-  },
 
  // Hardware Status
   heater: {
@@ -62,36 +57,36 @@ babyTemperature: {
     default: false
   },
 
-  exhaust: {
-    type: Boolean,
-    default: false
-  },
+  // exhaust: {
+  //   type: Boolean,
+  //   default: false
+  // },
 
-  // Water Tank
-  waterLevel: {
-    type: Number,
-    default: null
-  },
+  // // Water Tank
+  // waterLevel: {
+  //   type: Number,
+  //   default: null
+  // },
 
   // Gas Detection
-  gasDetected: {
-    type: Boolean,
-    default: false
-  },
+gas: {
+   type: Number,
+   required: true
+},
 
   // Buzzer / Alarm State
   alarmActive: {
     type: Boolean,
     default: false
   },
-dataType: {
-  type: String,
-  enum: ['patient', 'device'],
-  required: true,
-  index: true
-}
+// dataType: {
+//   type: String,
+//   enum: ['patient', 'device'],
+//   required: true,
+//   index: true
+// }
 }, {
   timestamps: true
 })
-
+sensorSchema.index({ createdAt: -1 })
 module.exports = mongoose.model("Sensor", sensorSchema)

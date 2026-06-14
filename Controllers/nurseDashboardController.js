@@ -1,9 +1,9 @@
 const Child = require('../Models/Child')
 const Alert = require('../Models/Alert')
 const Sensor = require('../Models/Sensor')
-const Access = require('../Models/UserChildAccess')
+const mongoose = require('mongoose')
 const { getAccessibleChildIds } = require('../Utils/alertAccessFilter')
-
+const { formatNurseDashboard } = require('../Utils/dto/nurseDashboard.dto')
 
 // ================= NURSE DASHBOARD =================
 exports.getNurseDashboard = async (req, res) => {
@@ -28,55 +28,61 @@ exports.getNurseDashboard = async (req, res) => {
           totalChildren: 0,
           activeAlerts: 0,
           children: [],
-          alerts: []
+          alerts: [],
+          latestSensors: []
         }
       })
     }
 
+    const childObjectIds = childIds.map(id =>
+      new mongoose.Types.ObjectId(id)
+    )
+
     // ================= CHILDREN =================
     const children = await Child.find({
-      _id: { $in: childIds },
+      _id: { $in: childObjectIds },
       status: "active"
-    }).populate('incubatorId', 'incubatorName')
+    })
+    // .populate('incubatorId', 'incubatorName')
 
     // ================= ALERTS =================
     const alerts = await Alert.find({
-      childId: { $in: childIds },
-      status: "active"
-    })
-      .populate("childId", "childName")
-      .populate("incubatorId", "incubatorName")
-      .sort({ createdAt: -1 })
-      .limit(10)
-// ================= LATEST SENSOR PER CHILD (OPTIMIZED) =================
-const latestSensorsRaw = await Sensor.aggregate([
-  { $match: { childId: { $in: childIds } } },
-  { $sort: { createdAt: -1 } },
-  {
-    $group: {
-      _id: "$childId",
-      data: { $first: "$$ROOT" }
-    }
-  }
-])
+  childId: { $in: childObjectIds },
+  targetRole: 'nurse',   // 👈 هذا أهم سطر بالنظام كله
+  status: 'active'
+})
+.sort({ createdAt: -1 })
+.limit(10)
 
-const latestSensors = latestSensorsRaw.map(item => ({
-  childId: item._id,
-  data: item.data
-}))
+    // ================= LATEST SENSOR PER CHILD =================
+    const latestSensorsRaw = await Sensor.aggregate([
+      { $match: { childId: { $in: childObjectIds } } },
+      { $sort: { createdAt: -1 } },
+      {
+        $group: {
+          _id: "$childId",
+          data: { $first: "$$ROOT" }
+        }
+      }
+    ])
+
+    const latestSensors = latestSensorsRaw.map(item => ({
+      childId: item._id,
+      data: item.data
+    }))
 
     return res.status(200).json({
-      status: "success",
-      data: {
-        summary: {
-          totalChildren: children.length,
-          activeAlerts: alerts.length
-        },
-        children,
-        alerts,
-        latestSensors
-      }
-    })
+  status: "success",
+  data: formatNurseDashboard({
+    summary: {
+      totalChildren: children.length,
+      activeAlerts: alerts.length
+    },
+    children,
+    alerts,
+    latestSensors
+  })
+})
 
   } catch (error) {
     return res.status(500).json({

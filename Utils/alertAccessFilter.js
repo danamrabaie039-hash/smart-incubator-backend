@@ -2,56 +2,34 @@ const Child = require('../Models/Child')
 const UserChildAccess = require('../Models/UserChildAccess')
 
 /**
- * هل المستخدم يقدر يشوف طفل معين؟
+ * هل المستخدم يقدر يشوف تنبيهات؟
+ * (Option A: nurse only)
  */
-const canViewAlert = async (user, childId) => {
-
+const canViewAlert = (user) => {
   const role = user.role?.toLowerCase()
 
-  // 🔥 ADMIN
-  if (role === "admin") return true
-
-  // ❌ DOCTOR ممنوع نهائياً من alerts
-  if (role === "doctor") return false
-
-  // 👩‍⚕️ NURSE فقط
-  if (role === "nurse") {
-    const access = await UserChildAccess.findOne({
-      userId: user._id,
-      childId,
-      accessStatus: "active"
-    })
-
-    return !!access
-  }
-
-  return false
+  return role === "nurse"
 }
 
 /**
- * يرجع كل الأطفال المسموح للمستخدم يشوفهم
+ * يرجع الأطفال المسموح للمستخدم يشوف تنبيهاتهم
  */
 const getAccessibleChildIds = async (user) => {
 
   const role = user.role?.toLowerCase()
 
-  // 🔥 ADMIN
-  if (role === "admin") {
-    const all = await Child.find().select('_id')
-    return all.map(c => c._id)
+  // 🔥 ADMIN / DOCTOR / ENGINEER = لا alerts نهائياً
+  if (role !== "nurse") {
+    return []
   }
 
-  // 👨‍⚕️ DOCTOR
-if (role === "doctor") {
-  // doctor does NOT have access to alerts system
-  return []
-}
-  // 👩‍⚕️ NURSE فقط عنده access
+  // 👩‍⚕️ NURSE فقط
   const accessList = await UserChildAccess.find({
     userId: user._id,
     accessStatus: "active"
-  })
-return accessList.map(a => a.childId.toString())
+  }).select("childId")
+
+  return accessList.map(a => a.childId.toString())
 }
 
 module.exports = {

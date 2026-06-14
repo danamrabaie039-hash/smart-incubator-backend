@@ -1,158 +1,111 @@
-// ================= ALERT ENGINE =================
+// ================= MEDICAL ALERTS (NURSE) =================
+const getMedicalAlerts = (sensor) => {
 
-exports.calculateAlertLevel = (sensor) => {
+  const alerts = []
 
+  const {
+    babyTemperature,
+    oxygenSaturation,
+    heartRate
+  } = sensor
+
+  if (babyTemperature > 37.5) {
+    alerts.push({
+      alertType: "baby_high_temperature",
+      level: "high",
+      targetRole: "nurse",
+      message: "High baby temperature detected"
+    })
+  } else if (babyTemperature < 36.5) {
+    alerts.push({
+      alertType: "baby_low_temperature",
+      level: "high",
+      targetRole: "nurse",
+      message: "Low baby temperature detected"
+    })
+  }
+
+  if (oxygenSaturation < 92) {
+    alerts.push({
+      alertType: "low_oxygen",
+      level: "critical",
+      targetRole: "nurse",
+      message: "Low oxygen saturation detected"
+    })
+  }
+
+  if (heartRate > 160) {
+    alerts.push({
+      alertType: "high_heart_rate",
+      level: "critical",
+      targetRole: "nurse",
+      message: "High heart rate detected"
+    })
+  } else if (heartRate < 120) {
+    alerts.push({
+      alertType: "low_heart_rate",
+      level: "high",
+      targetRole: "nurse",
+      message: "Low heart rate detected"
+    })
+  }
+
+  return alerts
+}
+
+
+// ================= ENGINEER ALERTS (SYSTEM) =================
+const getEngineerAlerts = (sensor) => {
 
   const alerts = []
 
   const {
     incubatorTemperature,
-    babyTemperature,
-    oxygenSaturation,
-    heartRate,
-    soundLevel
+    humidity,
+    gas,
+    alarmActive
   } = sensor
 
-
-  // ================= TEMPERATURE =================
-if (incubatorTemperature >= 40) {
-
-  alerts.push({
-    type: "high_temperature",
-    level: "critical",
-    message: "Dangerous incubator temperature detected"
-  })
-
-} else if (incubatorTemperature >= 39) {
-
-  alerts.push({
-    type: "high_temperature",
-    level: "high",
-    message: "Critical incubator temperature detected"
-  })
-
-} else if (incubatorTemperature >= 38) {
-
-  alerts.push({
-    type: "high_temperature",
-    level: "medium",
-    message: "Moderate incubator temperature rise detected"
-  })
-}
-
-if (babyTemperature >= 38) {
-
-  alerts.push({
-    type: "high_temperature",
-    level: "critical",
-    message: "Dangerous baby temperature detected"
-  })
-
-} else if (babyTemperature >= 37.5) {
-
-  alerts.push({
-    type: "high_temperature",
-    level: "high",
-    message: "High baby temperature detected"
-  })
-
-} else if (babyTemperature >= 37) {
-
-  alerts.push({
-    type: "high_temperature",
-    level: "medium",
-    message: "Slightly elevated baby temperature detected"
-  })
-}
-
-  // ================= OXYGEN =================
-  if (oxygenSaturation < 85) {
-
+  if (incubatorTemperature > 39) {
     alerts.push({
-      type: "low_oxygen",
-      level: "critical",
-      message: "Critical low oxygen level detected"
-    })
-
-  } else if (oxygenSaturation < 90) {
-
-    alerts.push({
-      type: "low_oxygen",
+      alertType: "incubator_high_temperature",
       level: "high",
-      message: "Low oxygen level detected"
+      targetRole: "engineer",
+      message: "Incubator overheating detected"
     })
   }
 
-
-  // ================= HEART RATE =================
-  if (heartRate > 170) {
-
+  if (humidity > 70) {
     alerts.push({
-      type: "high_heart_rate",
-      level: "critical",
-      message: "Dangerous heart rate detected"
-    })
-
-  } else if (heartRate > 160) {
-
-    alerts.push({
-      type: "high_heart_rate",
-      level: "high",
-      message: "High heart rate detected"
-    })
-
-  } else if (heartRate > 140) {
-
-    alerts.push({
-      type: "high_heart_rate",
+      alertType: "high_humidity",
       level: "medium",
-      message: "Elevated heart rate detected"
+      targetRole: "engineer",
+      message: "High humidity detected"
     })
   }
 
-
-  // ================= SOUND =================
-  if (soundLevel > 80) {
-
+  if (gas === true) {
     alerts.push({
-      type: "sound_detected",
-      level: "high",
-      message: "High noise detected"
-    })
-
-  } else if (soundLevel > 70) {
-
-    alerts.push({
-      type: "sound_detected",
-      level: "low",
-      message: "Unusual sound detected"
+      alertType: "gas_detected",
+      level: "critical",
+      targetRole: "engineer",
+      message: "Gas detected inside incubator"
     })
   }
 
-  if (sensor.humidity > 65) {
-  alerts.push({
-    type: 'high_humidity',
-    level: 'high',
-    message: 'High humidity detected'
-  })
-}
-// ================= GAS =================
-if (sensor.gasDetected === true) {
-  alerts.push({
-    type: 'gas_detected',
-    level: 'critical',
-    message: 'Gas detected inside incubator'
-  })
-}
-
-// ================= WATER LEVEL =================
-if (sensor.waterLevel <= 20) {
-  alerts.push({
-    type: 'low_water_level',
-    level: 'high',
-    message: 'Water level is low'
-  })
-}
+  if (alarmActive === true) {
+    alerts.push({
+      alertType: "alarm_active",
+      level: "medium",
+      targetRole: "engineer",
+      message: "System alarm is active"
+    })
+  }
 
   return alerts
+}
+
+module.exports = {
+  getMedicalAlerts,
+  getEngineerAlerts
 }

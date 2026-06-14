@@ -5,16 +5,14 @@ const Child = require('../Models/Child')
 
 // ================= ROLE CHECK =================
 const canManageAlerts = (role) => {
-  return role === 'nurse'
-
+   return role === 'nurse'
 }
 
 
 // ================= GET ACCESSIBLE CHILD IDS =================
 const getAccessibleChildIds = async (user) => {
 
-  const role = user.role?.toLowerCase()
-
+   const role = user.role?.toLowerCase()
 
   // NURSE فقط
   if (role === "nurse") {
@@ -35,8 +33,7 @@ exports.getAllAlerts = async (req, res) => {
   try {
 
 
-    const role = req.user.role?.toLowerCase()
-
+const role = req.user.role?.toLowerCase()
 if (!canManageAlerts(role)) {
   return res.status(403).json({
     message: "Alerts not allowed for this role"
@@ -78,8 +75,7 @@ exports.getActiveAlerts = async (req, res) => {
 
   try {
 
-    const role = req.user.role?.toLowerCase()
-
+const role = req.user.role?.toLowerCase()
 if (!canManageAlerts(role)) {
   return res.status(403).json({
     message: "Alerts not allowed for this role"
@@ -138,17 +134,17 @@ const alert = await Alert.findOne({
     }
 
     // ================= ACCESS CHECK =================
-    const access = await Access.findOne({
-      userId,
-      childId: alert.childId,
-      accessStatus: "active"
-    })
+    // const access = await Access.findOne({
+    //   userId,
+    //   childId: alert.childId,
+    //   accessStatus: "active"
+    // })
 
-    if (!access) {
-      return res.status(403).json({
-        message: "No permission for this child's alerts"
-      })
-    }
+    // if (!access) {
+    //   return res.status(403).json({
+    //     message: "No permission for this child's alerts"
+    //   })
+    // }
 
     // ================= UPDATE =================
     alert.status = "resolved"
@@ -185,7 +181,7 @@ exports.ignoreAlert = async (req, res) => {
     message: "Alerts not allowed for this role"
   })
 }
-
+const childIds = await getAccessibleChildIds(req.user)
     const alert = await Alert.findOne({
   _id: req.params.id,
   childId: { $in: childIds }
@@ -198,17 +194,17 @@ exports.ignoreAlert = async (req, res) => {
     }
 
     // ================= ACCESS CHECK =================
-    const access = await Access.findOne({
-      userId,
-      childId: alert.childId,
-      accessStatus: "active"
-    })
+    // const access = await Access.findOne({
+    //   userId,
+    //   childId: alert.childId,
+    //   accessStatus: "active"
+    // })
 
-    if ( !access) {
-      return res.status(403).json({
-        message: "No permission for this child's alerts"
-      })
-    }
+    // if ( !access) {
+    //   return res.status(403).json({
+    //     message: "No permission for this child's alerts"
+    //   })
+    // }
 
     // ================= UPDATE =================
     alert.status = "ignored"
