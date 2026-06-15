@@ -32,12 +32,14 @@ babyTemperature: {
   // 🟡 Baby health (SpO2 sensor)
   oxygenSaturation: {
     type: Number,
-    required: true
+    default: 0
+    // required: true
   },
 
   heartRate: {
     type: Number,
-    required: true
+    default: 0
+    // required: true
   },
 
 
@@ -57,21 +59,12 @@ babyTemperature: {
     default: false
   },
 
-  // exhaust: {
-  //   type: Boolean,
-  //   default: false
-  // },
-
-  // // Water Tank
-  // waterLevel: {
-  //   type: Number,
-  //   default: null
-  // },
 
   // Gas Detection
 gas: {
    type: Number,
-   required: true
+   default: 0
+  //  required: true
 },
 
   // Buzzer / Alarm State

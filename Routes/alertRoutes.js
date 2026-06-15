@@ -1,48 +1,54 @@
 const express = require('express')
-
 const router = express.Router()
 
 const alertController = require('../Controllers/alertController')
-
 const auth = require('../Middleware/auth')
-
 const roleMiddleware = require('../Middleware/roleMiddleware')
 
 
-// ================= GET ALL ALERTS =================
+// ================= NURSE ALERTS =================
 router.get(
-  '/',
+  '/nurse',
   auth,
-  roleMiddleware([ 'nurse']),
+  roleMiddleware(['nurse']),
   alertController.getAllAlerts
 )
 
-
-
-// ================= GET ACTIVE ALERTS =================
 router.get(
-  '/active',
+  '/nurse/active',
   auth,
   roleMiddleware(['nurse']),
   alertController.getActiveAlerts
 )
 
-
-// ================= RESOLVE ALERT =================
 router.put(
   '/:id/resolve',
   auth,
-  roleMiddleware([  'nurse']),
+  roleMiddleware(['nurse']),
   alertController.resolveAlert
 )
 
-
-// ================= IGNORE ALERT =================
 router.put(
   '/:id/ignore',
   auth,
-  roleMiddleware([ 'nurse']),
+  roleMiddleware(['nurse']),
   alertController.ignoreAlert
+)
+
+
+// ================= ENGINEER ALERTS =================
+router.get(
+  '/engineer',
+  auth,
+  roleMiddleware(['engineer']),
+  alertController.getAllAlerts
+)
+
+router.get(
+  '/engineer/active',
+  auth,
+  roleMiddleware(['engineer']),
+  alertController.getActiveAlerts
 )
 
 module.exports = router

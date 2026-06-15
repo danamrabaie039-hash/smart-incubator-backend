@@ -1,13 +1,28 @@
 const Alert = require('../Models/Alert')
 const Access = require('../Models/UserChildAccess')
 const Child = require('../Models/Child')
-
+const { evaluateAlerts } = require("../Utils/alertRules")
 
 // ================= ROLE CHECK =================
-const canManageAlerts = (role) => {
-   return role === 'nurse'
-}
+const canViewAlerts = (role, alertType) => {
 
+  role = role.toLowerCase()
+
+  if (role === "nurse") {
+    return alertType.includes("baby") ||
+           alertType.includes("heart") ||
+           alertType.includes("oxygen")
+  }
+
+  if (role === "engineer") {
+    return alertType.includes("incubator") ||
+           alertType.includes("gas") ||
+           alertType.includes("sensor") ||
+           alertType.includes("alarm")
+  }
+
+  return false
+}
 
 // ================= GET ACCESSIBLE CHILD IDS =================
 const getAccessibleChildIds = async (user) => {
@@ -224,4 +239,37 @@ const childIds = await getAccessibleChildIds(req.user)
     })
 
   }
+}
+exports.processSensorData = async (sensor, childId, incubatorId) => {
+
+  const activeAlerts = await Alert.find({
+    childId,
+    status: "active"
+  })
+
+  const { alertsToCreate, alertsToResolve } =
+    evaluateAlerts(sensor, activeAlerts)
+
+  // CREATE
+  for (const alert of alertsToCreate) {
+    await Alert.create({
+      ...alert,
+      childId,
+      incubatorId,
+      sensorSnapshot: sensor
+    })
+  }
+
+  // RESOLVE
+  await Alert.updateMany(
+    {
+      childId,
+      status: "active",
+      alertType: { $in: alertsToResolve }
+    },
+    {
+      status: "resolved",
+      resolvedAt: new Date()
+    }
+  )
 }

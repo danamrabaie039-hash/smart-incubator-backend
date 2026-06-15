@@ -2,7 +2,67 @@ const Sensor = require('../Models/Sensor')
 const Incubator = require('../Models/Incubator')
 const Child = require('../Models/Child')
 const Alert = require('../Models/Alert')
-const { getMedicalAlerts, getEngineerAlerts } = require('../Utils/alertRules')
+const { evaluateAlerts } = require('../Utils/alertRules')
+
+const resolveAlertsIfRecovered = async (sensor, childId) => {
+
+  const activeAlerts = await Alert.find({
+    childId,
+    status: "active"
+  })
+
+  for (const alert of activeAlerts) {
+
+    let shouldResolve = false
+
+    switch (alert.alertType) {
+
+      // 🟢 MEDICAL
+      case "baby_high_temperature":
+        if (sensor.babyTemperature <= 37.5) shouldResolve = true
+        break
+
+      case "baby_low_temperature":
+        if (sensor.babyTemperature >= 36.5) shouldResolve = true
+        break
+
+      case "low_oxygen":
+        if (sensor.oxygenSaturation >= 92) shouldResolve = true
+        break
+
+      case "high_heart_rate":
+        if (sensor.heartRate <= 160) shouldResolve = true
+        break
+
+      case "low_heart_rate":
+        if (sensor.heartRate >= 120) shouldResolve = true
+        break
+
+      // 🟡 ENGINEER
+      case "incubator_high_temperature":
+        if (sensor.incubatorTemperature <= 39) shouldResolve = true
+        break
+
+      case "high_humidity":
+        if (sensor.humidity <= 70) shouldResolve = true
+        break
+
+      case "gas_detected":
+        if (sensor.gas === 0) shouldResolve = true
+        break
+
+      case "alarm_active":
+        if (sensor.alarmActive === false) shouldResolve = true
+        break
+    }
+
+    if (shouldResolve) {
+      alert.status = "resolved"
+      alert.resolvedAt = new Date()
+      await alert.save()
+    }
+  }
+}
 
 exports.createSensorData = async (req, res) => {
   try {
@@ -58,47 +118,28 @@ exports.createSensorData = async (req, res) => {
       lastUpdate: new Date()
     })
 
-    // ================= ALERT ENGINE =================
-    const medicalAlerts = getMedicalAlerts({
-      babyTemperature,
-      oxygenSaturation,
-      heartRate
-    })
+// ================= ALERT ENGINE =================
 
-    const engineerAlerts = getEngineerAlerts({
-      incubatorTemperature,
-      humidity,
-      gas,
-      alarmActive
-    })
+const activeAlerts = await Alert.find({
+  childId: child._id,
+  status: "active"
+})
 
-    // 👉 الدمج حسب النظام (حاليًا الاثنين معًا)
-    const alerts = [...medicalAlerts, ...engineerAlerts]
+const { alertsToCreate, alertsToResolve } =
+  evaluateAlerts({
+    incubatorTemperature,
+    babyTemperature,
+    humidity,
+    oxygenSaturation,
+    heartRate,
+    gas,
+    alarmActive
+  }, activeAlerts)
 
-    const createdAlerts = []
+const createdAlerts = []
 
-    const nurseSnapshot = {
-  babyTemperature,
-  oxygenSaturation,
-  heartRate
-}
 
-const engineerSnapshot = {
-  incubatorTemperature,
-  humidity,
-  gas,
-  alarmActive
-}
-
-    for (const alert of alerts) {
-
-      const existingAlert = await Alert.findOne({
-        childId: child._id,
-        alertType: alert.alertType,
-        status: "active"
-      })
-
-      if (existingAlert) continue
+    for (const alert of alertsToCreate) {
 
       const newAlert = await Alert.create({
         childId: child._id,
@@ -108,15 +149,48 @@ const engineerSnapshot = {
         targetRole: alert.targetRole,
         message: alert.message,
         status: "active",
-        sensorSnapshot:
-      alert.targetRole === 'nurse'
-    ? nurseSnapshot
-    : engineerSnapshot
-      })
+         sensorSnapshot: alert.targetRole === 'nurse'
+      ? {
+          babyTemperature,
+          oxygenSaturation,
+          heartRate
+        }
+      : {
+          incubatorTemperature,
+          humidity,
+          gas,
+          alarmActive
+        }
+  })
 
-      createdAlerts.push(newAlert)
-    }
+  createdAlerts.push(newAlert)
+}
 
+await resolveAlertsIfRecovered(
+  {
+    incubatorTemperature,
+    babyTemperature,
+    humidity,
+    oxygenSaturation,
+    heartRate,
+    gas,
+    alarmActive
+  },
+  child._id
+)
+
+// ================= RESOLVE =================
+await Alert.updateMany(
+  {
+    childId: child._id,
+    status: "active",
+    alertType: { $in: alertsToResolve }
+  },
+  {
+    status: "resolved",
+    resolvedAt: new Date()
+  }
+)
     return res.status(201).json({
       status: "success",
       data: {
@@ -175,17 +249,20 @@ exports.getEngineerSensorView = async (req, res) => {
         message: "No sensor data"
       })
     }
+return res.json({
+  status: "success",
+  data: {
+    incubatorTemperature: sensor.incubatorTemperature,
+    humidity: sensor.humidity,
 
-    return res.json({
-      status: "success",
-      data: {
-        heater: sensor.heater,
-        fan: sensor.fan,
-        humidifier: sensor.humidifier,
-        gas: sensor.gas,
-        alarmActive: sensor.alarmActive
-      }
-    })
+    heater: sensor.heater,
+    fan: sensor.fan,
+    humidifier: sensor.humidifier,
+
+    gas: sensor.gas,
+    alarmActive: sensor.alarmActive
+  }
+})
 
   } catch (error) {
     return res.status(500).json({
