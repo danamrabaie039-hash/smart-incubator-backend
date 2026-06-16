@@ -3,6 +3,7 @@ const Incubator = require('../Models/Incubator')
 const Child = require('../Models/Child')
 const Alert = require('../Models/Alert')
 const { evaluateAlerts } = require('../Utils/alertRules')
+const { getIncubatorRules } = require('../Utils/incubatorRules')
 
 const resolveAlertsIfRecovered = async (sensor, childId) => {
 
@@ -56,7 +57,7 @@ const resolveAlertsIfRecovered = async (sensor, childId) => {
         break
     }
 
-    if (shouldResolve) {
+    if (shouldResolve && alert.status === "active") {
       alert.status = "resolved"
       alert.resolvedAt = new Date()
       await alert.save()
@@ -97,6 +98,7 @@ exports.createSensorData = async (req, res) => {
         message: "No child assigned"
       })
     }
+     const rules = getIncubatorRules(child.birthWeek)
 
     // ================= SAVE SENSOR =================
     const sensor = await Sensor.create({
@@ -134,7 +136,8 @@ const { alertsToCreate, alertsToResolve } =
     heartRate,
     gas,
     alarmActive
-  }, activeAlerts)
+  }, activeAlerts,
+      rules )
 
 const createdAlerts = []
 
@@ -179,18 +182,24 @@ await resolveAlertsIfRecovered(
   child._id
 )
 
+const io = req.app.get('io')
+
+io.emit('sensor-update', {
+  sensor,
+  alerts: createdAlerts
+})
 // ================= RESOLVE =================
-await Alert.updateMany(
-  {
-    childId: child._id,
-    status: "active",
-    alertType: { $in: alertsToResolve }
-  },
-  {
-    status: "resolved",
-    resolvedAt: new Date()
-  }
-)
+// await Alert.updateMany(
+//   {
+//     childId: child._id,
+//     status: "active",
+//     alertType: { $in: alertsToResolve }
+//   },
+//   {
+//     status: "resolved",
+//     resolvedAt: new Date()
+//   }
+// )
     return res.status(201).json({
       status: "success",
       data: {

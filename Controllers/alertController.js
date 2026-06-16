@@ -49,15 +49,13 @@ exports.getAllAlerts = async (req, res) => {
 
 
 const role = req.user.role?.toLowerCase()
-if (!canManageAlerts(role)) {
-  return res.status(403).json({
-    message: "Alerts not allowed for this role"
-  })
-}
+
+
     const childIds = await getAccessibleChildIds(req.user)
 
     const query = {
-      childId: { $in: childIds }
+      childId: { $in: childIds },
+      targetRole: role
     }
 
     if (req.query.status) {
@@ -91,18 +89,13 @@ exports.getActiveAlerts = async (req, res) => {
   try {
 
 const role = req.user.role?.toLowerCase()
-if (!canManageAlerts(role)) {
-  return res.status(403).json({
-    message: "Alerts not allowed for this role"
-  })
-}
-    
 
     const childIds = await getAccessibleChildIds(req.user)
 
     const alerts = await Alert.find({
       status: "active",
-      childId: { $in: childIds }
+      childId: { $in: childIds },
+      targetRole: role
     })
     .populate("childId", "childName")
     .populate("incubatorId", "incubatorName")
@@ -128,12 +121,7 @@ exports.resolveAlert = async (req, res) => {
     const role = req.user.role?.toLowerCase()
     const userId = req.user._id
 
-    // ================= ROLE CHECK =================
-    if (!canManageAlerts(role)) {
-  return res.status(403).json({
-    message: "Alerts not allowed for this role"
-  })
-}
+
 
     const childIds = await getAccessibleChildIds(req.user)
 
@@ -190,12 +178,7 @@ exports.ignoreAlert = async (req, res) => {
     const role = req.user.role?.toLowerCase()
     const userId = req.user._id
 
-    // ================= ROLE CHECK =================
-  if (!canManageAlerts(role)) {
-  return res.status(403).json({
-    message: "Alerts not allowed for this role"
-  })
-}
+
 const childIds = await getAccessibleChildIds(req.user)
     const alert = await Alert.findOne({
   _id: req.params.id,
@@ -272,4 +255,36 @@ exports.processSensorData = async (sensor, childId, incubatorId) => {
       resolvedAt: new Date()
     }
   )
+}
+
+exports.acknowledgeAlert = async (req, res) => {
+  try {
+
+    const alert = await Alert.findById(req.params.id)
+
+    if (!alert) {
+      return res.status(404).json({
+        status: "error",
+        message: "Alert not found"
+      })
+    }
+
+    // optional: منع تكرار التحديث
+    if (!alert.acknowledgedAt) {
+      alert.acknowledgedAt = new Date()
+      await alert.save()
+    }
+
+    return res.status(200).json({
+      status: "success",
+      message: "Alert acknowledged",
+      data: alert
+    })
+
+  } catch (error) {
+    return res.status(500).json({
+      status: "error",
+      message: error.message
+    })
+  }
 }

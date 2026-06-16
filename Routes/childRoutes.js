@@ -29,7 +29,7 @@ router.get(
 router.get(
   '/:id',
   auth,
-  accessMiddleware.checkChildAccess('view'),
+  accessMiddleware.checkChildAccess(),
   childController.getChildById
 )
 
@@ -38,17 +38,16 @@ router.put(
   '/:id',
   auth,
   roleMiddleware(['nurse']),
-  accessMiddleware.checkChildAccess('edit'),
+  accessMiddleware.checkChildAccess(),
   childController.updateChild
 )
 
 router.patch(
-  '/discharge/:id',
+  '/:id/discharge',
   auth,
  roleMiddleware(['nurse']),
  accessMiddleware.checkChildAccess(),
   childController.dischargeChild
 ) 
-
 
 module.exports = router

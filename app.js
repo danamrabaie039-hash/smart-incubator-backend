@@ -2,6 +2,8 @@ const express = require('express')
 const mongoose = require('mongoose')
 require('dotenv').config()
 const cors = require('cors')
+const http = require('http')
+const { Server } = require('socket.io')
 const userRoutes = require('./Routes/userRoutes')
 const childRoutes = require('./Routes/childRoutes')
 const incubatorRoutes = require('./Routes/incubatorRoutes')
@@ -13,8 +15,18 @@ const maintenanceRoutes = require('./Routes/maintenanceRoutes')
 const engineerDashboardRoutes = require('./Routes/engineerDashboardRoutes')
 const nurseDashboardRoutes = require('./Routes/nurseDashboardRoutes')
 const doctorDashboardRoutes = require('./Routes/doctorDashboardRoutes')
+const qrRoutes = require('./Routes/qrRoutes')
+const cameraRoutes = require('./Routes/cameraRoutes')
 const app = express()
 
+const server = http.createServer(app)
+
+const io = new Server(server, {
+  cors: {
+    origin: "*"
+  }
+})
+app.set('io', io)
 app.use(cors())
 app.use(express.json())
 
@@ -22,7 +34,7 @@ app.use(express.urlencoded({ extended: true }))
 app.get('/', (req, res) => {
   res.json({ message: "Smart Incubator API is running 🚀" })
 })
-
+app.use(express.static('public'))
 app.use('/api/users', userRoutes)
 app.use('/api/children', childRoutes) 
 app.use('/api/access', require('./Routes/userChildAccessRoutes'))
@@ -35,6 +47,16 @@ app.use('/api/maintenance', maintenanceRoutes)
 app.use('/api/engineer-dashboard', engineerDashboardRoutes)
 app.use('/api/nurse-dashboard', nurseDashboardRoutes)
 app.use('/api/doctor-dashboard', doctorDashboardRoutes)
+app.use('/api/qr', qrRoutes)
+app.use('/api/camera', cameraRoutes)
+
+io.on('connection', (socket) => {
+  console.log('Socket Connected:', socket.id)
+
+  socket.on('disconnect', () => {
+    console.log('Socket Disconnected:', socket.id)
+  })
+})
 const connectToDB = async () => {
   try {
     mongoose.set('strictQuery', false)
@@ -48,8 +70,8 @@ const connectToDB = async () => {
 const PORT = process.env.PORT || 5000
 
 connectToDB().then(() => {
-  app.listen(PORT, () => {
-    console.log("Server running on port", PORT)
-  })
+server.listen(PORT, () => {
+  console.log("Server running on port", PORT)
 })
 
+})

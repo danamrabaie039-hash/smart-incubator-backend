@@ -58,17 +58,26 @@ const childSchema = new mongoose.Schema({
     default: Date.now
   },
 
-status: {
-  type: String,
-  enum: ['active', 'discharged'],
-  default: 'active'
-},
-
   incubatorId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Incubator',
     default: null
-  }
+  },
+  qrToken: {
+  type: String,
+  unique: true,
+  sparse: true
+},
+
+isActive: {
+  type: Boolean,
+  default: true
+},
+status: {
+  type: String,
+  enum: ['active', 'discharged'],
+  default: 'active'
+}
 
 }, {
   timestamps: true

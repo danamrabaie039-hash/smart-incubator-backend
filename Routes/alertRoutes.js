@@ -50,5 +50,17 @@ router.get(
   roleMiddleware(['engineer']),
   alertController.getActiveAlerts
 )
+router.patch(
+  '/:id/acknowledge',
+  auth,
+  roleMiddleware(['nurse']),
+  alertController.acknowledgeAlert
+)
+router.patch(
+  '/:id/acknowledge',
+  auth,
+  roleMiddleware(['engineer']),
+  alertController.acknowledgeAlert
+)
 
 module.exports = router

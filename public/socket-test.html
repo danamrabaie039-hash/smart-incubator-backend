@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Socket Test</title>
+</head>
+<body>
+
+<h2>Live Sensor Data</h2>
+<pre id="output"></pre>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+  const socket = io("http://localhost:5000");
+
+  const output = document.getElementById("output");
+
+  socket.on("connect", () => {
+    output.innerText += "Connected ✅\n";
+  });
+
+socket.on("sensor-update", (data) => {
+  console.log("NEW DATA:", data);
+  output.innerText = JSON.stringify(data, null, 2);
+});
+</script>
+
+</body>
+</html>

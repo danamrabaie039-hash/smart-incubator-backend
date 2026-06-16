@@ -1,7 +1,7 @@
 const childModule = require('../Models/Child')
 const Incubator = require('../Models/Incubator')
 const Access = require('../Models/UserChildAccess')
-
+const crypto = require('crypto')
 
 // ================= CREATE CHILD =================
 exports.createChild = async function (req, res) {
@@ -26,9 +26,11 @@ exports.createChild = async function (req, res) {
       bloodType,
       birthWeight,
       currentWeight,
-      medicalCondition
+      medicalCondition,
     } = req.body
 
+
+    const qrToken = crypto.randomBytes(32).toString('hex')
     // ================= INCUBATOR =================
     const incubator = await Incubator.findOneAndUpdate(
       { status: "active", isOccupied: false },
@@ -56,7 +58,9 @@ exports.createChild = async function (req, res) {
       birthWeight,
       currentWeight,
       medicalCondition,
-      incubatorId: incubator._id
+      incubatorId: incubator._id,
+       // 🟢 QR SYSTEM
+      qrToken
     })
 
     // ================= ACCESS (NURSE ONLY) =================
@@ -70,7 +74,8 @@ exports.createChild = async function (req, res) {
       status: "success",
       message: "Child created successfully",
       data: { child, 
-        incubator:safeIncubator }
+        incubator:safeIncubator,
+       qrLink: `${req.protocol}://${req.get('host')}/api/qr/${qrToken}` }
     })
 
   } catch (error) {
@@ -295,10 +300,11 @@ if (!access) {
     status: "error",
     message: "No access to this child"
   })
+  
 }
     const child = await childModule.findByIdAndUpdate(
       req.params.id,
-      { status: "discharged" },
+      { status: "discharged",  qrToken: null, isActive: false },
       { new: true }
     )
 
