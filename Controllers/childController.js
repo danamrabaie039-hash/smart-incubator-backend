@@ -2,6 +2,8 @@ const childModule = require('../Models/Child')
 const Incubator = require('../Models/Incubator')
 const Access = require('../Models/UserChildAccess')
 const crypto = require('crypto')
+const HourlyReport = require('../Models/HourlyReport')
+const MedicalReport = require('../Models/MedicalReport')
 
 // ================= CREATE CHILD =================
 exports.createChild = async function (req, res) {
@@ -303,10 +305,16 @@ if (!access) {
   
 }
     const child = await childModule.findByIdAndUpdate(
-      req.params.id,
-      { status: "discharged",  qrToken: null, isActive: false },
-      { new: true }
-    )
+  req.params.id,
+  {
+    status: "discharged",
+    isActive: false,
+    $unset: {
+      qrToken: 1
+    }
+  },
+  { new: true }
+)
 
     if (!child) {
       return res.status(404).json({
@@ -314,7 +322,25 @@ if (!access) {
         message: "Child not found"
       })
     }
+// ================= ARCHIVE HOURLY REPORTS =================
+await HourlyReport.updateMany(
+  { childId: child._id },
+  {
+    $set: {
+      isArchived: true
+    }
+  }
+)
 
+// ================= ARCHIVE MEDICAL REPORTS =================
+await MedicalReport.updateMany(
+  { childId: child._id },
+  {
+    $set: {
+      isArchived: true
+    }
+  }
+)
     // ================= CLOSE ACCESS =================
     await Access.updateMany(
       { childId: child._id },

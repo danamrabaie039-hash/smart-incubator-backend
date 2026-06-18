@@ -17,7 +17,9 @@ const nurseDashboardRoutes = require('./Routes/nurseDashboardRoutes')
 const doctorDashboardRoutes = require('./Routes/doctorDashboardRoutes')
 const qrRoutes = require('./Routes/qrRoutes')
 const cameraRoutes = require('./Routes/cameraRoutes')
+const childHistoryRoutes = require('./Routes/childHistoryRoutes')
 const app = express()
+
 
 const server = http.createServer(app)
 
@@ -49,6 +51,7 @@ app.use('/api/nurse-dashboard', nurseDashboardRoutes)
 app.use('/api/doctor-dashboard', doctorDashboardRoutes)
 app.use('/api/qr', qrRoutes)
 app.use('/api/camera', cameraRoutes)
+app.use('/api/child-history', childHistoryRoutes)
 
 io.on('connection', (socket) => {
   console.log('Socket Connected:', socket.id)

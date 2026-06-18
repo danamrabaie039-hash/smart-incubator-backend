@@ -24,7 +24,6 @@ router.get(
   childController.getAllChildren
 )
 
-
 // ================= GET CHILD BY ID =================
 router.get(
   '/:id',
