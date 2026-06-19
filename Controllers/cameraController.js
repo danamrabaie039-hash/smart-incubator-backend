@@ -1,9 +1,17 @@
 const Incubator = require('../Models/Incubator')
+const AUTH_TOKEN = "ICU_CAM_2026_SECRET"
 
 // ================= REGISTER CAMERA =================
 exports.registerCamera = async (req, res) => {
   try {
 
+        // 🔐 AUTH CHECK
+    if (req.headers.authorization !== `Bearer ${AUTH_TOKEN}`) {
+      return res.status(401).json({
+        status: "error",
+        message: "Unauthorized"
+      })
+    }
     const { incubatorId, cameraUrl } = req.body
 
     if (!incubatorId || !cameraUrl) {
