@@ -8,7 +8,6 @@ const cameraController = require("../Controllers/cameraController");
 router.post("/register", cameraController.registerCamera);
 
 
-// stream camera (frontend → backend → ESP32)
-router.get("/incubator/:id/stream", cameraController.streamCamera);
 
 module.exports = router
+

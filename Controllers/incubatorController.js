@@ -1,4 +1,6 @@
 const Incubator = require('../Models/Incubator')
+const Child = require('../Models/Child')
+
 const crypto = require('crypto')
 // CREATE
 exports.createIncubator = async (req, res) => {
@@ -179,5 +181,25 @@ exports.updateIncubator = async (req, res) => {
       status: "error",
       message: err.message
     })
+  }
+}
+exports.getIncubatorAge = async (req, res) => {
+  try {
+
+    const incubator = req.incubator
+
+    const child = await Child.findOne({
+      incubatorId: incubator._id,
+      status: { $ne: 'discharged' }
+    })
+
+    if (!child) {
+      return res.send('AGE=35')
+    }
+
+    return res.send(`AGE=${child.birthWeek}`)
+
+  } catch (error) {
+    return res.status(500).send('AGE=35')
   }
 }

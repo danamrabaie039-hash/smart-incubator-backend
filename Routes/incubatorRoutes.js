@@ -5,12 +5,17 @@ const controller = require('../Controllers/incubatorController')
 
 const auth = require('../Middleware/auth')
 const roleMiddleware = require('../Middleware/roleMiddleware')
-
+const sensorDeviceAuth = require('../Middleware/sensorDeviceAuth')
 router.post(
   '/',
   auth,
   roleMiddleware(['engineer']),
   controller.createIncubator
+)
+router.get(
+  '/age',
+  sensorDeviceAuth,
+  controller.getIncubatorAge
 )
 router.get(
   '/',
@@ -52,4 +57,5 @@ router.get(
   roleMiddleware(['engineer']),
   controller.getIncubatorById
 )
+
 module.exports = router
