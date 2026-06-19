@@ -67,6 +67,15 @@ const resolveAlertsIfRecovered = async (sensor, childId) => {
 
 exports.createSensorData = async (req, res) => {
   try {
+     // 👇 هون بتحط الفحص هذا
+    const body = req.body;
+
+  if (!body || Object.keys(body).length === 0) {
+  return res.status(400).json({
+    status: "error",
+    message: "Empty or invalid request body"
+  });
+}
 
     const {
       incubatorTemperature,
@@ -79,7 +88,7 @@ exports.createSensorData = async (req, res) => {
       humidifier,
       gas,
       alarmActive
-    } = req.body
+    } = body;
 
     const incubator = req.incubator
 
