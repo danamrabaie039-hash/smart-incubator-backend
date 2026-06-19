@@ -53,6 +53,7 @@ app.use('/api/qr', qrRoutes)
 app.use('/api/camera', cameraRoutes)
 app.use('/api/child-history', childHistoryRoutes)
 
+
 io.on('connection', (socket) => {
   console.log('Socket Connected:', socket.id)
 
