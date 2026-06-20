@@ -289,6 +289,17 @@ exports.updateUser = async function (req, res) {
 
     const userId = req.params.id
 
+
+    const user = await userModule.findById(userId)
+
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found"
+      })
+    }
+
+
     const updates = {}
 
     if (req.body.phone) {
@@ -299,14 +310,43 @@ exports.updateUser = async function (req, res) {
       updates.specialty = req.body.specialty.trim()
     }
 
-    if (req.body.displayName) {
-      updates.displayName = req.body.displayName.trim()
+    // if (req.body.displayName) {
+    //   updates.displayName = req.body.displayName.trim()
+    // }
+
+
+    // ================= NAME =================
+    if (req.body.name && req.body.name !== user.name) {
+      const name = req.body.name.trim()
+
+      updates.name = name
+
+      // توليد displayName تلقائي
+      updates.displayName = getDisplayName(user.role, name)
     }
 
+     // ================= EMAIL =================
+    if (req.body.email && req.body.email !== user.email) {
+
+      const email = req.body.email.trim().toLowerCase()
+
+      const existingUser = await userModule.findOne({
+        email,
+        _id: { $ne: userId }
+      })
+
+      if (existingUser) {
+        return res.status(400).json({
+          status: "error",
+          message: "Email already exists"
+        })
+      }
+       updates.email = email
+    }
     const updatedUser = await userModule.findByIdAndUpdate(
       userId,
       updates,
-      { new: true }
+      { new: true, runValidators: true }
     )
 
     if (!updatedUser) {
