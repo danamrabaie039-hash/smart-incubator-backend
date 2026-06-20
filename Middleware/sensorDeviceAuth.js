@@ -10,7 +10,6 @@ module.exports = async (req, res, next) => {
         message: "Missing API key"
       })
     }
-
     const incubator = await Incubator.findOne({ apiKey })
 
     if (!incubator) {

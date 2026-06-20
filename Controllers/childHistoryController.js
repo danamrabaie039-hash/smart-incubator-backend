@@ -62,11 +62,19 @@ const archivedMedicalReports = await MedicalReport.find({
 })
 .populate("doctorId", "name role")
 .sort({ createdAt: -1 })
-      const nurse = hourlyReports[0]?.nurseId || null
-const doctor = medicalReports[0]?.doctorId || null
+//       const nurse = hourlyReports[0]?.nurseId || null
+// const doctor = medicalReports[0]?.doctorId || null
 
 const cleanHourlyReports = hourlyReports.map(r => ({
   id: r._id,
+//   nurseId: r.nurseId,
+    nurse: r.nurseId
+    ? {
+        id: r.nurseId._id,
+        name: r.nurseId.name,
+        role: r.nurseId.role
+      }
+    : null,
   babyTemperature: r.babyTemperature,
   oxygenSaturation: r.oxygenSaturation,
   heartRate: r.heartRate,
@@ -79,6 +87,14 @@ const cleanHourlyReports = hourlyReports.map(r => ({
 }))
 const cleanMedicalReports = medicalReports.map(r => ({
   id: r._id,
+    // doctorId: r.doctorId,
+    doctor: r.doctorId
+    ? {
+        id: r.doctorId._id,
+        name: r.doctorId.name,
+        role: r.doctorId.role
+      }
+    : null,
   temperatureStatus: r.temperatureStatus,
   oxygenStatus: r.oxygenStatus,
   heartStatus: r.heartStatus,
@@ -119,8 +135,8 @@ child: {
   admissionDate: child.admissionDate
 },
         stats,
-        nurse,             // 👈 مرة وحدة
-        doctor,         // 👈 مرة وحدة
+        // nurse,             // 👈 مرة وحدة
+        // doctor,         // 👈 مرة وحدة
    
      active: {
       hourlyReports: cleanHourlyReports,
@@ -132,7 +148,7 @@ child: {
     }
       }
     })
-    
+
 
   } catch (error) {
     return res.status(500).json({
