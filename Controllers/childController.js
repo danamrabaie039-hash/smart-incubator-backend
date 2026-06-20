@@ -249,7 +249,8 @@ if (!access) {
       "birthWeight",
       "currentWeight",
       "medicalCondition",
-      "bloodType"
+      "bloodType",
+        "birthWeek"
     ]
 
     const updates = {}

@@ -10,18 +10,26 @@
 
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
-  const socket = io("http://localhost:5000");
-
-  const output = document.getElementById("output");
-
-  socket.on("connect", () => {
-    output.innerText += "Connected ✅\n";
+  const socket = io("http://localhost:5000", {
+    query: { userId: "doctor1" }
   });
 
-socket.on("sensor-update", (data) => {
-  console.log("NEW DATA:", data);
-  output.innerText = JSON.stringify(data, null, 2);
-});
+  socket.on("connect", () => {
+    console.log("Doctor connected:", socket.id);
+
+    // 🔥 إرسال رسالة بعد الاتصال
+    setTimeout(() => {
+      socket.emit("private_message", {
+        toUserId: "nurse1",
+        fromUserId: "doctor1",
+        message: "Hello Nurse 👋"
+      });
+    }, 2000);
+  });
+
+  socket.on("private_message", (data) => {
+    console.log("Doctor received:", data);
+  });
 </script>
 
 </body>
