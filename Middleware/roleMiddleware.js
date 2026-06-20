@@ -20,7 +20,6 @@ module.exports = (roles = []) => {
         message: "Invalid role"
       })
     }
-
     // 🟡 2. Route-level authorization
     // إذا الراوت ما محدد roles → يسمح لكل valid roles
     if (roles.length && !roles.includes(userRole)) {

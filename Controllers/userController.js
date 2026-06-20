@@ -102,7 +102,7 @@ exports.login = async function (req, res) {
         role: normalizedRole
       },
       process.env.JWT_SECRET,
-      { expiresIn: '1d' }
+      { expiresIn: '7d' }
     )
 
     return res.status(200).json({
